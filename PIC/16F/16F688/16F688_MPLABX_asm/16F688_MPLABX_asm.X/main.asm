@@ -99,13 +99,17 @@ start:
 ;
 ; Main code
 ;
+    extern user
 MAIN_CODE CODE
 main:
 ;   
 ; Application loop
 ;   
 AppLoop:
-    
+	pagesel	user
+	call	user
+
+	pagesel	AppLoop
         goto    AppLoop
     
         end
