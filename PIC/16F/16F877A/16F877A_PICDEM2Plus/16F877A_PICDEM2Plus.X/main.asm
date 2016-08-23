@@ -1,8 +1,8 @@
 ; 
 ; File: main.asm
 ; Target: PIC16F877A
-; IDE: MPLAB v8.92
-; Compiler: MPASMWIN v5.51
+; IDE: MPLAB v3.35
+; Compiler: MPASMWIN v5.68
 ;
 ; -------------------------
 ; Main application

@@ -11,6 +11,7 @@
 *.obj.dmp
 *.map
 html/
+parts/
 nbproject/private/
 nbproject/Package-*.bash
 nbproject/Makefile-*
