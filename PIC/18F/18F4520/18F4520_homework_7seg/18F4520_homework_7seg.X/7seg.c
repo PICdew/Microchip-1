@@ -200,7 +200,7 @@ void Init_ButtonInput (void)
     SW1_DIR = 1;
 }   
 /*
- * Setup displau output
+ * Setup display output
  */
 void Init_DisplayOutput (void)
 {   
@@ -240,7 +240,7 @@ unsigned char OneMsTick (void)
  *          ZERO on all other button states.
  * 
  * Notes:
- *  This function is designed to be callled once per millisecond.
+ *  This function is designed to be called once per millisecond.
  *  It will return a ONE when the button has changed from the
  *  unpressed to the pressed state and remains pressed for 20
  *  calls to this function.
