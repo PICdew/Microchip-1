@@ -1,0 +1,51 @@
+## SCL Builder Setup File: Do not edit!!
+
+## VERSION: MPLAB X
+## FORMAT:  v2.00.01
+## DEVICE:  PIC18F4520
+
+## PINREGACTIONS
+cyc
+No Repeat
+--
+&
+## ADVPINREGACTIONS
+--
+&
+--
+COND1
+Any
+
+
+
+0
+cyc
+
+--
+&
+## CLOCK
+&
+## STIMULUSFILE
+&
+## RESPONSEFILE
+&
+## ASYNCH
+Pin
+RC0
+Set High
+
+
+-1
+--
+Pin
+RC0
+Pulse Low
+30 ms
+
+3
+--
+&
+## ADVANCEDSCL
+
+0
+&

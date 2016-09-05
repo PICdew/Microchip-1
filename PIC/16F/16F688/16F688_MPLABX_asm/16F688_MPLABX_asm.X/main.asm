@@ -94,14 +94,14 @@ start:
         movlw   0x00
         movwf   TRISC       ; RC5-RC0 outputs
         banksel PORTA       ; Bank 0
-        pagesel main
-        goto    main
+        pagesel main_start
+        goto    main_start
 ;
 ; Main code
 ;
     extern user
 MAIN_CODE CODE
-main:
+main_start:
 ;   
 ; Application loop
 ;   
