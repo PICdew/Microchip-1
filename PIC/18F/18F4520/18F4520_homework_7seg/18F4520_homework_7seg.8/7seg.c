@@ -83,7 +83,7 @@
  * An LED segment is lighted when the output bit is one and is
  * dark when the output bit is zero,
  * 
- * This implementation uses TIMER0 in 8-bit mode with a 1:8 clock prescale.
+ * This implementation uses TIMER0 in 8-bit mode with a 1:16 clock prescale.
  * Using the internal 8MHz oscillator one millisecond of real time will
  * have passed when TIMER0 has counted 250 times.
  * 
@@ -259,7 +259,7 @@ unsigned char ButtonEvent (void)
     if (SW1 != 1)
     {
         /* SW1 is pressed */
-        ButtonInput = SW1_INPUT_MASK;
+        ButtonInput |= SW1_INPUT_MASK;
     }
     ButtonChange = ButtonSample ^ ButtonInput;
     if (ButtonChange)
@@ -275,7 +275,7 @@ unsigned char ButtonEvent (void)
             ButtonStable ^= ButtonChange;
             if (ButtonStable & ButtonChange & SW1_INPUT_MASK)
             {
-                /* Return a ONE if SW1 changed AND the it changed to pressed */
+                /* Return a ONE if SW1 changed AND it changed to pressed */
                 return 1;
             }
         }
