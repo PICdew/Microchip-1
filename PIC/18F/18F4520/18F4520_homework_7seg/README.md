@@ -1,13 +1,13 @@
 # PIC18F4520 homework seven segment LED
 =======================================
 
-This is one way to complete the generic homework assignments
-for many courses on PIC programming. This assignment is typical
-are for introductory courses where students are using MPLAB for 
+This is one way to complete the generic homework assignment
+common in courses on PIC programming. This work is often
+assigned in introductory courses. Students may be using MPLAB for 
 the first time. It is also common for the students to be learning
 about the PROTEUS simulation environment as well.
 
-This example has a single digit 7-segment display connected to
+This example has a single digit 7-segment LED display connected to
 PORTB, bits 6 to 0 and a push button switch connected PORTC, bit 0.
 
 The application detects a change of the push button switch then
