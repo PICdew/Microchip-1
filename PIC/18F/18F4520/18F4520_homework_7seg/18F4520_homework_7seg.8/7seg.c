@@ -85,7 +85,7 @@
  * 
  * This implementation uses TIMER0 in 8-bit mode with a 1:16 clock prescale.
  * Using the internal 8MHz oscillator one millisecond of real time will
- * have passed when TIMER0 has counted 250 times.
+ * have passed when TIMER0 has counted 125 times.
  * 
  * The push button switch input is considered stable when the 
  * input has not changed for at least 20 of these one millisecond
