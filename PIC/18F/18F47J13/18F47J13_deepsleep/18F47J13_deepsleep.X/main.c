@@ -1,6 +1,6 @@
 /*
  * File: main.c
- * Target: PIC18F27J13
+ * Target: PIC18F47J13
  * IDE: MPLABX v3.35
  * Compiler: XC8 v1.38
  *
