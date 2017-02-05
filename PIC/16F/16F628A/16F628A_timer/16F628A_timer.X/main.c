@@ -80,9 +80,6 @@ volatile unsigned char gucLedSegments[2];
 volatile unsigned char gucDiaplayStatus;
 volatile unsigned char gucBeepOffTime;
 /*
- * Local Data
- */
-/*
  *  Interrupt service routines
  */
 void interrupt ISR_Handlers(void)
@@ -357,7 +354,7 @@ void LED_DisplayHex (unsigned char Value)
     gucLedSegments[1] = LedDigits[Value & 0x0F];
 }
 /*
- * Display test to turn on and segments of each display
+ * Display test to turn on all segments of each display
  */
 void LED_DisplayTest (unsigned char Value)
 {
