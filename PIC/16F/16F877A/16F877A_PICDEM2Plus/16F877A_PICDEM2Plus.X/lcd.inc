@@ -19,6 +19,7 @@
     ExtSymbol   WriteDataXLCD
     ExtSymbol   OpenXLCD
     ExtSymbol   PutHexXLCD
+    ExtSymbol   PutDecXLCD
     ExtSymbol   putrsXLCD
 
 ; end of public symbols

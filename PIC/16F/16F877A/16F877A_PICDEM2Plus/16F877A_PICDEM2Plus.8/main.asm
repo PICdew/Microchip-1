@@ -99,11 +99,16 @@ lcdTestRestart:
     movlw   LINE_TWO
     lcall   SetDDRamAddr
 
-    movlw   LOW(LCD_message_BlankLine)
+    movlw   LOW(LCD_message6)
     movwf   pszLCD_RomStr
-    movlw   HIGH(LCD_message_BlankLine)
+    movlw   HIGH(LCD_message6)
     movwf   pszLCD_RomStr+1
     lcall   putrsXLCD
+
+    movlw   LINE_TWO+D'14'
+    lcall   SetDDRamAddr
+    movf    LCD_BusyBit,W
+    lcall   PutHexXLCD
 
     banksel lcdTestCount
     clrf    lcdTestCount
@@ -153,11 +158,16 @@ lcdTestNextState:
     movwf   pszLCD_RomStr+1
     lcall   putrsXLCD
 
-    movlw   LINE_ONE+D'14'
+    movlw   LINE_ONE+D'9'
     lcall   SetDDRamAddr
     banksel lcdTestCount
     movf    lcdTestCount,W
-    lcall   PutHexXLCD
+    lcall   PutDecXLCD
+    movlw   '-'
+    lcall   WriteDataXLCD
+    movf    lcdTestCount,W
+    addlw   D'15'
+    lcall   PutDecXLCD
 
     movlw   LINE_TWO
     lcall   SetDDRamAddr
@@ -182,7 +192,9 @@ MAIN_CONST   code
 LCD_message_BlankLine:
     dt  "                ",0
 LCD_message4:
-    dt  "LCD test Ver 1.1",0
+    dt  "LCD test Ver 1.2",0
 LCD_message5:
-    dt  "Character row   ",0
+    dt  "Symbols:        ",0
+LCD_message6:
+    dt  "BusyBitMask:0x  ",0
     END

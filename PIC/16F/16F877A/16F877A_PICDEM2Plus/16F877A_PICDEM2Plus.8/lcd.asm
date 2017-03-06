@@ -359,6 +359,79 @@ PutHexNibbleXLCD:
         movf    pszLCD_RomStr,W
         return
 ;
+; Function Name:  PutDecXLCD
+; Return Value:   void
+; Parameters:     W = 8-bit value to send to LCD
+; Description:    Writes three ASCII character of the
+;                 decimal value in thw W register.
+;
+PutDecXLCD:
+        clrf    pszLCD_RomStr+1
+
+        addlw   d'256'-d'200'
+        skpnc
+        bsf     pszLCD_RomStr+1,1
+        skpc
+        addlw   d'200'
+        
+        addlw   d'256'-d'100'
+        skpnc
+        bsf     pszLCD_RomStr+1,0
+        skpc
+        addlw   d'100'
+        
+        movwf   pszLCD_RomStr       ; save output value less than 100
+        
+        movlw   0x1F
+        andwf   pszLCD_RomStr+1,W
+        bsf     pszLCD_RomStr+1,5
+        skpz
+        bsf     pszLCD_RomStr+1,4
+        movf    pszLCD_RomStr+1,W
+        btfsc   pszLCD_RomStr+1,4
+        call    WriteDataXLCD       ; output 100's digit
+        movlw   0x10
+        andwf   pszLCD_RomStr+1,F
+
+        movf    pszLCD_RomStr,W
+        addlw   d'256'-d'80'
+        skpnc
+        bsf     pszLCD_RomStr+1,3
+        skpc
+        addlw   d'80'
+        
+        addlw   d'256'-d'40'
+        skpnc
+        bsf     pszLCD_RomStr+1,2
+        skpc
+        addlw   d'40'
+        
+        addlw   d'256'-d'20'
+        skpnc
+        bsf     pszLCD_RomStr+1,1
+        skpc
+        addlw   d'20'
+        
+        addlw   d'256'-d'10'
+        skpnc
+        bsf     pszLCD_RomStr+1,0
+        skpc
+        addlw   d'10'
+        movwf   pszLCD_RomStr
+
+        movlw   0x1F
+        andwf   pszLCD_RomStr+1,W
+        bsf     pszLCD_RomStr+1,5
+        skpz
+        bsf     pszLCD_RomStr+1,4
+        movf    pszLCD_RomStr+1,W
+        btfsc   pszLCD_RomStr+1,4
+        call    WriteDataXLCD       ; output 10's digit
+        movlw   '0'
+        addwf   pszLCD_RomStr,W
+        call    WriteDataXLCD       ; output 1's digit
+        return
+;
 ; Function Name:  putrsXLCD
 ; Return Value:   void
 ; Parameters:     pszLCD_RomStr: pointer to string

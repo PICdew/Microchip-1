@@ -19,7 +19,9 @@
     ExtSymbol   WriteDataXLCD
     ExtSymbol   OpenXLCD
     ExtSymbol   PutHexXLCD
+    ExtSymbol   PutDecXLCD
     ExtSymbol   putrsXLCD
+    ExtSymbol   LCD_BusyBit
 
 ; end of public symbols
 #undefine ExtSymbol
