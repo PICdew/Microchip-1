@@ -15,7 +15,7 @@
 ; Warnings: 
 ;   The PIC10F200 4MHz oscillator accuracy is at best 1% so this will be unreliable.
 ;
-;   This code uses Read-Modify-Write on a GPIO port register. This is know to have
+;   This code uses Read-Modify-Write on a GPIO port register. This is known to have
 ;   problems when the GPIO output drives a low impedance load. You have been warned.
 ;
 #define TX_out_bit_position (1)
@@ -37,8 +37,8 @@ TX_out_loop:
     btfsc   STATUS,C
     xorwf   GPIO,F                      ; assert bit 
     clrc
-    rrf     TX_byte,F
-    movf    TX_byte,F
+    rrf     TX_byte,F                   ; shift out next bit to CARRY
+    movf    TX_byte,F                   ; Test for ZERO, shows all bits have been sent.
     bnz     TX_out_loop
     GOTO    $+1
     NOP
