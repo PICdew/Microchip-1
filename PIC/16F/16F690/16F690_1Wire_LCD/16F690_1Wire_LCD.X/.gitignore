@@ -4,6 +4,7 @@
 *.pre
 *.p1
 *.lst
+*.err
 *.sym
 *.obj
 *.o

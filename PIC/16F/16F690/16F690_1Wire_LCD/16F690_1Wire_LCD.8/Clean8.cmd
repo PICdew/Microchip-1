@@ -25,6 +25,10 @@ echo Removing *.obj files...
 del *.obj /f /q
 echo.
 
+echo Removing *.o files...
+del *.o /f /q
+echo.
+
 echo Removing *.rlf files...
 del *.rlf /f /q
 echo.
@@ -101,13 +105,10 @@ echo Removing *.hex files...
 del *.hex /f /q
 echo.
 
-echo Removing *.o files...
-del *.o /f /q
+echo Removing RIUSBLogFile.txt files...
+del RIUSBLogFile.txt /f /q
 echo.
 
-echo Removing *.err files...
-del *.err /f /q
-echo.
 
 echo Done.
 pause

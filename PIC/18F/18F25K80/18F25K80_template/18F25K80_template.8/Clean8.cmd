@@ -25,6 +25,10 @@ echo Removing *.obj files...
 del *.obj /f /q
 echo.
 
+echo Removing *.o files...
+del *.o /f /q
+echo.
+
 echo Removing *.rlf files...
 del *.rlf /f /q
 echo.
