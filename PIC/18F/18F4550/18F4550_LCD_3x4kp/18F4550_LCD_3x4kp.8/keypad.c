@@ -31,8 +31,8 @@ void Keypad_Init(void)
 }
 /*
  * Called from ISR handler to sample all keys
- * in the keypad matrix, debounce and set the
- * 
+ * in the keypad matrix, debounce and update the
+ * stable state.
  */
 void Keypad_Scan(void)
 {
@@ -87,7 +87,7 @@ void Keypad_Scan(void)
         return;
     }
 
-    /* Update the stable output only when pevious stable state has been read */
+    /* Update the stable output only after pevious stable state has been read */
     if (KP_Changed == 0)
     {
         KP_Changed = KP_Sample ^ KP_Stable;
