@@ -1,8 +1,8 @@
-# PIC18F4550 homework LCD with 3x4 keypad and 8 channels of ADC
-===============================================================
+# PIC18F4550 for LCD module, 3x4 keypad and 8 channels of ADC
+=============================================================
 
-This is one way to complete homework assignment that implements
-much of the elemental function to interface an Hitachi HD44780
+This is one way to complete a homework assignment that implements
+much of the elemental functions to interface an Hitachi HD44780
 LCD module for ASCII character display, a 3x4 telephone style
 keypad and 8 ADC channels to convert extern 0-5 volt analog
 signal inputs.
