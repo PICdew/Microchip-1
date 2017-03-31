@@ -31,7 +31,12 @@
 #include "keypad.h"
 #include "lcd.h"
 #include "tick.h"
+#include "pwm.h"
 
+#define MAJOR_REV (1)
+#define MINOR_REV (4)
+
+#define PWM_TestDelta (7)
 /*
  * Interrupt handlers
  */
@@ -50,7 +55,7 @@ void interrupt ISR_Handler(void)
 /*
  * Display application name and version
  */
-void ShowVersion(unsigned int MajorVersion, unsigned int MinorVersion)
+void ShowVersion(void)
 {
     unsigned char buffer[17];
     
@@ -58,12 +63,12 @@ void ShowVersion(unsigned int MajorVersion, unsigned int MinorVersion)
     LCD_WriteConstString("LCD Test ");
 
     buffer[0] = 0;
-    utoa(buffer,MajorVersion,10);
+    utoa(buffer,MAJOR_REV,10);
     LCD_WriteString(buffer);
     LCD_WriteData('.');
 
     buffer[0] = 0;
-    utoa(buffer,MinorVersion,10);
+    utoa(buffer,MINOR_REV,10);
     LCD_WriteString(buffer);
 }
 /*
@@ -85,23 +90,37 @@ void ShowKeypadMatrix(unsigned int Sample)
 /*
  * Used for ADC code debug
  */
-void ShowAdcChannel(unsigned char Key)
+void ShowAdcChannel(unsigned char Channel)
 {
     unsigned char buffer[17];
 
-    if ((Key >= '0') && (Key <= '7'))
-    {
-        LCD_SetDDRamAddr(LINE_ONE);
-        LCD_WriteConstString("                ");
-        LCD_SetDDRamAddr(LINE_ONE);
-        LCD_WriteData('A');
-        LCD_WriteData('N');
-        LCD_WriteData(Key);
-        LCD_WriteData(':');
-        buffer[0] = 0;
-        utoa(buffer,ADC_ReadChannel(Key & 0x0F),10);
-        LCD_WriteString(buffer);
-    }
+    LCD_SetDDRamAddr(LINE_ONE);
+    LCD_WriteConstString("                ");
+    LCD_SetDDRamAddr(LINE_ONE);
+    LCD_WriteData('A');
+    LCD_WriteData('N');
+    LCD_WriteData(Channel+'0');
+    LCD_WriteData(':');
+    buffer[0] = 0;
+    utoa(buffer,ADC_ReadChannel(Channel),10);
+    LCD_WriteString(buffer);
+}
+/*
+ * Used for PWM code debug
+ */
+void ShowPwmDutyCycle(unsigned char PWM, unsigned char DutyCycle)
+{
+    unsigned char buffer[17];
+
+    LCD_SetDDRamAddr(LINE_ONE);
+    LCD_WriteConstString("CCP :           ");
+    LCD_SetDDRamAddr(LINE_ONE+3);
+    LCD_WriteData(PWM+'0');
+    LCD_SetDDRamAddr(LINE_ONE+5);
+    buffer[0] = 0;
+    utoa(buffer,DutyCycle,10);
+    LCD_WriteString(buffer);
+    LCD_WriteData('%');
 }
 /*
  * Application
@@ -111,19 +130,24 @@ void main(void)
     unsigned int  KP_sample;
     unsigned char Key;
     KeypadEvent_t Keypad_Event;
+    unsigned char PWM1_DutyCycle;
+    unsigned char PWM2_DutyCycle;
     
     PIC_Init();
     ADC_Init();
     LCD_Init();
     Keypad_Init();
     Tick_Init();
-    ADC_ReadChannel(0);
+    PWM_Init();
 
     INTCONbits.PEIE = 1;
     INTCONbits.GIE  = 1;
 
+    PWM1_DutyCycle = 0;
+    PWM2_DutyCycle = 0;
+
     /* Display the application name and version information */
-    ShowVersion(1,3);
+    ShowVersion();
 
     /* Show what is in the character generator RAM */
     LCD_SetDDRamAddr(LINE_TWO);
@@ -134,25 +158,54 @@ void main(void)
     for(;;)
     {
         /* check for and process key presses */
-        switch (Keypad_GetEvent())
+        if (Keypad_GetEvent() == eKeyChanged)
         {
-            case eKeyChanged:
+            LCD_SetDDRamAddr(LINE_TWO);
+            LCD_WriteConstString("Key Pressed:    ");
+            Key = Keypad_GetKey(&Keypad_Event);
+            if (Key != 0)
             {
-                LCD_SetDDRamAddr(LINE_TWO);
-                LCD_WriteConstString("Key Pressed:    ");
-                Key = Keypad_GetKey(&Keypad_Event);
-                
-                if (Key)
+                LCD_SetDDRamAddr(LINE_TWO+13);
+                LCD_WriteData(Key);
+                switch (Key)
                 {
-                    ShowAdcChannel(Key);
-                    LCD_SetDDRamAddr(LINE_TWO+13);
-                    LCD_WriteData(Key);
+                    case '0':
+                    case '1':
+                    case '2':
+                    case '3':
+                    case '4':
+                    case '5':
+                    case '6':
+                    case '7':
+                        ShowAdcChannel(Key & 0x0F);
+                        break;
+                    case '9':
+                        if (PWM1_DutyCycle <= 100-PWM_TestDelta) PWM1_DutyCycle += PWM_TestDelta;
+                        else PWM1_DutyCycle = 100;
+                        PWM_SetPwm1DutyCycle(PWM1_DutyCycle);
+                        ShowPwmDutyCycle(1,PWM1_DutyCycle);
+                        break;
+                    case '8':
+                        if (PWM1_DutyCycle >= PWM_TestDelta) PWM1_DutyCycle -= PWM_TestDelta;
+                        else PWM1_DutyCycle = 0;
+                        PWM_SetPwm1DutyCycle(PWM1_DutyCycle);
+                        ShowPwmDutyCycle(1,PWM1_DutyCycle);
+                        break;
+                    case '#':
+                        if (PWM2_DutyCycle <= 100-PWM_TestDelta) PWM2_DutyCycle += PWM_TestDelta;
+                        else PWM2_DutyCycle = 100;
+                        PWM_SetPwm2DutyCycle(PWM2_DutyCycle);
+                        ShowPwmDutyCycle(2,PWM2_DutyCycle);
+                        break;
+                    case '*':
+                        if (PWM2_DutyCycle >= PWM_TestDelta) PWM2_DutyCycle -= PWM_TestDelta;
+                        else PWM2_DutyCycle = 0;
+                        PWM_SetPwm2DutyCycle(PWM2_DutyCycle);
+                        ShowPwmDutyCycle(2,PWM2_DutyCycle);
+                        break;
+                    default:
+                        break;
                 }
-                break;
-            }
-            default:
-            {
-                break;
             }
         }
     }

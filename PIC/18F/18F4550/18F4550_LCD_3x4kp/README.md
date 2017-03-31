@@ -23,10 +23,14 @@ Press any key on the keypad and the message "Key Pressed :" is displayed.
 Also when keys 0 to 7 are pressed the ADC value is displayed for
 analog inputs AN0 to AN7.
 
-See:  http://www.microchip.com/forums/FindPost/979462
+See:
 
-Also: http://www.microchip.com/forums/FindPost/978149
-      http://www.microchip.com/forums/FindPost/978369
-      http://www.microchip.com/forums/FindPost/979382
-      http://www.microchip.com/forums/FindPost/981970
-      http://www.microchip.com/forums/FindPost/982425
+http://www.microchip.com/forums/FindPost/979462
+
+Also:
+
+http://www.microchip.com/forums/FindPost/978149
+http://www.microchip.com/forums/FindPost/978369
+http://www.microchip.com/forums/FindPost/979382
+http://www.microchip.com/forums/FindPost/981970
+http://www.microchip.com/forums/FindPost/982425

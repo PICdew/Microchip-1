@@ -10,6 +10,7 @@
       <itemPath>lcd.h</itemPath>
       <itemPath>main.h</itemPath>
       <itemPath>tick.h</itemPath>
+      <itemPath>../../../../../../../PIC/18F/18F4455/f979382/18F4455_LCD_3x4kp/src/pwm.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -24,6 +25,7 @@
       <itemPath>lcd.c</itemPath>
       <itemPath>main.c</itemPath>
       <itemPath>tick.c</itemPath>
+      <itemPath>../../../../../../../PIC/18F/18F4455/f979382/18F4455_LCD_3x4kp/src/pwm.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -33,6 +35,7 @@
   </logicalFolder>
   <sourceRootList>
     <Elem>.</Elem>
+    <Elem>../../../../../../../PIC/18F/18F4455/f979382/18F4455_LCD_3x4kp/src</Elem>
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
