@@ -143,11 +143,14 @@ void main(void)
     INTCONbits.PEIE = 1;
     INTCONbits.GIE  = 1;
 
-    PWM1_DutyCycle = 0;
-    PWM2_DutyCycle = 0;
+    PWM1_DutyCycle = 40;
+    PWM2_DutyCycle = 60;
 
     /* Display the application name and version information */
     ShowVersion();
+
+    PWM_SetPwm1DutyCycle(PWM1_DutyCycle);
+    PWM_SetPwm2DutyCycle(PWM2_DutyCycle);
 
     /* Show what is in the character generator RAM */
     LCD_SetDDRamAddr(LINE_TWO);

@@ -20,8 +20,15 @@ After Power On Reset the application name and version is displayed
 along with the contents of the LCD character generator RAM.
 
 Press any key on the keypad and the message "Key Pressed :" is displayed.
-Also when keys 0 to 7 are pressed the ADC value is displayed for
+
+When keys 0 to 7 are pressed the ADC value is displayed for
 analog inputs AN0 to AN7.
+
+When key 8 is pressed the duty cycle of the PWM output on CCP1 decreases.
+When key 9 is pressed the duty cycle of the PWM output on CCP1 increases.
+When key * is pressed the duty cycle of the PWM output on CCP2 decreases.
+When key # is pressed the duty cycle of the PWM output on CCP2 increases.
+
 
 See:
 
