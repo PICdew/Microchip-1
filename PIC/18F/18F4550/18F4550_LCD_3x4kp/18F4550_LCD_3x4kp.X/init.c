@@ -24,8 +24,8 @@
  *           20MHZ <- 14 : OSC2              RD4 : 27 -> LCD_RS
  *     KP_COL1_OUT <- 15 : RC0         RX/DT/RC7 : 26 <- RXD
  *            PWM2 <- 16 : RC1/CCP2    TX/CK/RC6 : 25 -> TXD
- *            PWM1 <- 17 : RC2/CCP1       D+/RC5 : 24 <>
- *                 <> 18 : VUSB           D-/RC4 : 23 <>
+ *            PWM1 <- 17 : RC2/CCP1       D+/RC5 : 24 <-
+ *                 <> 18 : VUSB           D-/RC4 : 23 <-
  *          LCD_D4 <> 19 : RD0               RD3 : 22 <> LCD_D7
  *          LCD_D5 <> 20 : RD1               RD2 : 21 <> LCD_D6
  *                       +-----------------------:
@@ -106,7 +106,7 @@ void PIC_Init(void) {
     TRISB  = 0x0F;      /* RB0-3 are keypad row inputs, RB4,RB5 are keypad COL2,COL3 drivers, RB6,RB7 are used for In-Circuit-Debug */
     INTCON2bits.nRBPU = 0; /* enable PORTB pull-ups for inputs */
     LATC   = 0x00;
-    TRISC  = 0x01;      /* RC0 is keypad COL1 driver */
+    TRISC  = 0x31;      /* RC0 is keypad COL1 driver, RC4 & RC5 are input only pins when not using the USB */
     LATD   = 0x00;
     TRISD  = 0x00;
     LATE   = 0x00;
