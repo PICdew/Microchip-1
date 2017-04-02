@@ -95,6 +95,7 @@ for %%I IN (*.mcp) do del /f /q %%~nI.mcw
 echo.
 
 echo Removing XC8 and HTC compiler files...
+del *.tmp /f /q
 del *.d /f /q
 del *.p1 /f /q
 del *.pre /f /q
