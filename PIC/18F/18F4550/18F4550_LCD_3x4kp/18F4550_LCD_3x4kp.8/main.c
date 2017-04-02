@@ -10,7 +10,7 @@
  *  2 - Provide 2 PWM signals to my MOSFETs
  *  3 - Voltage and current sensor (2 to 3 each)
  *  4 - Two temprature sensors
- *  5 - Keypad 3x4, telephone (1-9,*,0,#)
+ *  5 - Keypad 3x4, telephone style (1-9,*,0,#)
  *  6 - LCD module, ASCII, 16 characters, 2 rows
  *
  *  See:  http://www.microchip.com/forums/FindPost/979462
@@ -34,7 +34,10 @@
 #include "pwm.h"
 
 #define MAJOR_REV (1)
-#define MINOR_REV (4)
+#define MINOR_REV (5)
+#define DISPLAY_UPDATE_PERIOD (147)
+
+volatile unsigned char SysTick;
 
 #define PWM_TestDelta (7)
 /*
@@ -48,6 +51,7 @@ void interrupt ISR_Handler(void)
         if(INTCONbits.TMR0IF)
         {
             INTCONbits.TMR0IF = 0;
+            SysTick++;
             Keypad_Scan();
         }
     }
@@ -132,6 +136,8 @@ void main(void)
     KeypadEvent_t Keypad_Event;
     unsigned char PWM1_DutyCycle;
     unsigned char PWM2_DutyCycle;
+    unsigned char DisplayUpdateTick;
+    unsigned char DisplayUpdateFlag;
     
     PIC_Init();
     ADC_Init();
@@ -155,11 +161,21 @@ void main(void)
     /* Show what is in the character generator RAM */
     LCD_SetDDRamAddr(LINE_TWO);
     LCD_WriteConstString("\010\011\012\013\014\015\016\017"); /* octal byte constants in a string */
+    LCD_WriteConstString(" 17APR01");
     
     KP_sample = Keypad_GetSample();
 
+    DisplayUpdateFlag = 0;
+
     for(;;)
     {
+        /* Update ADC disply every DISPLAY_UPDATE_PERIOD ticks */
+        if ((DisplayUpdateFlag != 0) && ((unsigned char)(SysTick - DisplayUpdateTick) >= DISPLAY_UPDATE_PERIOD))
+        {
+            DisplayUpdateTick = SysTick;
+            ShowAdcChannel(DisplayUpdateFlag & 0x0F);
+        }
+
         /* check for and process key presses */
         if (Keypad_GetEvent() == eKeyChanged)
         {
@@ -180,31 +196,37 @@ void main(void)
                     case '5':
                     case '6':
                     case '7':
-                        ShowAdcChannel(Key & 0x0F);
-                        break;
-                    case '9':
-                        if (PWM1_DutyCycle <= 100-PWM_TestDelta) PWM1_DutyCycle += PWM_TestDelta;
-                        else PWM1_DutyCycle = 100;
-                        PWM_SetPwm1DutyCycle(PWM1_DutyCycle);
-                        ShowPwmDutyCycle(1,PWM1_DutyCycle);
+                        DisplayUpdateFlag = Key;
+                        DisplayUpdateTick = SysTick;
+                        ShowAdcChannel(DisplayUpdateFlag & 0x0F);
                         break;
                     case '8':
                         if (PWM1_DutyCycle >= PWM_TestDelta) PWM1_DutyCycle -= PWM_TestDelta;
                         else PWM1_DutyCycle = 0;
                         PWM_SetPwm1DutyCycle(PWM1_DutyCycle);
                         ShowPwmDutyCycle(1,PWM1_DutyCycle);
+                        DisplayUpdateFlag = 0;
                         break;
-                    case '#':
-                        if (PWM2_DutyCycle <= 100-PWM_TestDelta) PWM2_DutyCycle += PWM_TestDelta;
-                        else PWM2_DutyCycle = 100;
-                        PWM_SetPwm2DutyCycle(PWM2_DutyCycle);
-                        ShowPwmDutyCycle(2,PWM2_DutyCycle);
+                    case '9':
+                        if (PWM1_DutyCycle <= 100-PWM_TestDelta) PWM1_DutyCycle += PWM_TestDelta;
+                        else PWM1_DutyCycle = 100;
+                        PWM_SetPwm1DutyCycle(PWM1_DutyCycle);
+                        ShowPwmDutyCycle(1,PWM1_DutyCycle);
+                        DisplayUpdateFlag = 0;
                         break;
                     case '*':
                         if (PWM2_DutyCycle >= PWM_TestDelta) PWM2_DutyCycle -= PWM_TestDelta;
                         else PWM2_DutyCycle = 0;
                         PWM_SetPwm2DutyCycle(PWM2_DutyCycle);
                         ShowPwmDutyCycle(2,PWM2_DutyCycle);
+                        DisplayUpdateFlag = 0;
+                        break;
+                    case '#':
+                        if (PWM2_DutyCycle <= 100-PWM_TestDelta) PWM2_DutyCycle += PWM_TestDelta;
+                        else PWM2_DutyCycle = 100;
+                        PWM_SetPwm2DutyCycle(PWM2_DutyCycle);
+                        ShowPwmDutyCycle(2,PWM2_DutyCycle);
+                        DisplayUpdateFlag = 0;
                         break;
                     default:
                         break;
