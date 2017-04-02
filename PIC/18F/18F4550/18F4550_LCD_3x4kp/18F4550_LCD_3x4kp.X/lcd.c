@@ -24,11 +24,11 @@ static unsigned char LCD_BusyBit;
 static const unsigned char CGRAM_Table[] =
 {
     0b10000000, /* CGRAM character 1 */
-    0b10001110,
-    0b10001010,
-    0b10001010,
-    0b10001110,
-    0b10000000,
+    0b10000100,
+    0b10000010,
+    0b10001111,
+    0b10000010,
+    0b10000100,
     0b10000000,
     0b10011111,
 
@@ -87,11 +87,11 @@ static const unsigned char CGRAM_Table[] =
     0b10011111,
 
     0b10000000, /* CGRAM character 8 */
-    0b10001110,
-    0b10001010,
-    0b10001010,
-    0b10001110,
-    0b10000000,
+    0b10000100,
+    0b10001000,
+    0b10011110,
+    0b10001000,
+    0b10000100,
     0b10000000,
     0b10011111,
 
