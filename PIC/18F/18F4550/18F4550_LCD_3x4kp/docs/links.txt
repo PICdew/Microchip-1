@@ -1,0 +1,32 @@
+Microchip Practical Guide to Implementing Solar Panel MPPT Algorithms AN1521:
+http://ww1.microchip.com/downloads/en/AppNotes/00001521A.pdf
+
+Optimised Photovoltaic Solar Charger With Voltage Maximum Power Point Tracking:
+http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.521.8850&rep=rep1&type=pdf
+
+Design of the MPPT in PV System Based on PIC18F4550 Microcontroller:
+http://www.ipco-co.com/PET_Journal/CIER-2014_Papers/78.pdf
+
+Implementation of a PIC-based, Photovoltaic Maximum Power Point Tracking Control System:
+http://www.ijetae.com/files/Volume4Issue5/IJETAE_0514_61.pdf
+
+Implementation of MPPT algorithm on PV panel using PIC16F877 controller:
+http://esatjournals.net/ijret/2015v04/i06/IJRET20150406009.pdf
+
+Photovoltaic Battery Charging System  Based on PIC16F877A Microcontroller:
+http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.683.3386&rep=rep1&type=pdf
+
+PIC Based Automatic Solar Radiation Tracker:
+https://pdfs.semanticscholar.org/c7dd/f687936624b386a22425fec696de212798d9.pdf
+
+Microcontroller Based Solar Smart Charge Controller using MPPT:
+http://ijsetr.com/uploads/263415IJSETR1001-163.pdf
+
+Solar Maximum Power Point Tracker, ECE4007 Senior Design Project:
+http://www2.ece.gatech.edu/academic/courses/ece4007/11spring/ECE4007L01/ws2/files/deliverables/proposal/SJ%20MPPT%20Proposal%20248.pdf
+
+Maximum Power Tracking Based Open Circuit Voltage Method for PV System:
+http://ac.els-cdn.com/S1876610216313753/1-s2.0-S1876610216313753-main.pdf?_tid=d1d26394-175e-11e7-9455-00000aacb35e&acdnat=1491108347_72d0f7ead0b90e4cc321d9196c8982c0
+
+NERD GIRLS, Maximum Power Point Tracker:
+http://www.nerdgirls.org/technical/seniorprojects/mppt/MPPT_final_report.pdf
