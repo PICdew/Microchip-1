@@ -17,7 +17,6 @@ void ADC_Init(void)
     ADCON1 = 0x07;                  /* Make RA0,RA1,RA2,RA3,RA5,RE0,RE1,RE2 analog inputs */
     ADCON2 = 0b10011110;            /* Right justified, ACQ time 6-TAD, TAD = FSYS/64 */
     ADCON0bits.ADON = 1;            /* Turn on ADC */
-    return;
 }
 
 unsigned int ADC_ReadChannel(unsigned char Channel)

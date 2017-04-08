@@ -262,8 +262,6 @@ void LCD_Init(void)
     
     /* Set first position on line one, left most character */
     LCD_SetDDRamAddr(LINE_ONE);
-    
-    return;
 }
 
 void LCD_SetCGRamAddr(unsigned char data)
@@ -271,7 +269,6 @@ void LCD_SetCGRamAddr(unsigned char data)
     LCD_Busy();
     RS_PIN = 0;            
     LCD_PutByte(data | 0x40);
-    return;
 }
 
 void LCD_SetDDRamAddr(unsigned char data)
@@ -279,7 +276,6 @@ void LCD_SetDDRamAddr(unsigned char data)
     LCD_Busy();
     RS_PIN = 0;
     LCD_PutByte(data | 0x80);
-    return;
 }
 
 void LCD_WriteCmd(unsigned char data)
@@ -287,7 +283,6 @@ void LCD_WriteCmd(unsigned char data)
     LCD_Busy();
     RS_PIN = 0;
     LCD_PutByte(data);
-    return;
 }
 
 void LCD_WriteData(unsigned char data)
@@ -296,8 +291,6 @@ void LCD_WriteData(unsigned char data)
     RS_PIN = 1;
     LCD_PutByte(data);
     RS_PIN = 0;
-
-    return;
 }
 
 void LCD_WriteConstString(const unsigned char * prString)
@@ -307,7 +300,6 @@ void LCD_WriteConstString(const unsigned char * prString)
         LCD_WriteData(*prString);
         prString++;
     }
-    return;
 }
 
 void LCD_WriteString(unsigned char * pString)
@@ -317,5 +309,4 @@ void LCD_WriteString(unsigned char * pString)
         LCD_WriteData(*pString);
         pString++;
     }
-    return;
 }

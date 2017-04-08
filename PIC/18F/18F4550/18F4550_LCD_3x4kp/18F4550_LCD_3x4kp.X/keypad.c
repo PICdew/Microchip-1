@@ -27,7 +27,6 @@ void Keypad_Init(void)
     KP_COL3_OUT_DIR = 0;
     KP_Last = 0;
     KP_DebounceCounter = 0;
-    return;
 }
 /*
  * Called from ISR handler to sample all keys
@@ -58,8 +57,8 @@ void Keypad_Scan(void)
     if (!KP_ROW3_IN) KP_Sample |= 0x0040;
     if (!KP_ROW4_IN) KP_Sample |= 0x0080;
     KP_COL2_OUT = 1;
-    KP_COL1_OUT_DIR = 1;
     KP_COL2_OUT_DIR = 1;
+    KP_COL1_OUT_DIR = 1;
     KP_COL3_OUT_DIR = 0;
     KP_COL3_OUT = 0;
     if (!KP_ROW1_IN) KP_Sample |= 0x0100;
@@ -93,7 +92,6 @@ void Keypad_Scan(void)
         KP_Changed = KP_Sample ^ KP_Stable;
         KP_Stable = KP_Sample;
     }
-    return;
 }
 /*
  * Returns non-zero when a key event occurs.
