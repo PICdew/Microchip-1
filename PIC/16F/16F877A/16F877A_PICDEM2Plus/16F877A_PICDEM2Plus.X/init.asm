@@ -54,7 +54,6 @@ INTERRUPT:
 ;------------------------------------------------------------------------
 start:
     clrf    INTCON              ; Disable all interrupt sources
-    clrf    TMR0
     banksel BANK1
     clrf    PIE1
     clrf    PIE2
@@ -85,6 +84,7 @@ start:
     movwf   ADCON1
     
     banksel BANK0
+    clrf    TMR0
     pagesel main
     goto    main
 
