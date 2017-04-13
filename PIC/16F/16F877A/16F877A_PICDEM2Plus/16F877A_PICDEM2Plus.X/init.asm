@@ -1,7 +1,7 @@
 ; 
 ; File: init.asm
 ; Target: PIC16F877A
-; IDE: MPLABX v3.35
+; IDE: MPLABX v3.55
 ; Compiler: MPASMWIN v5.68
 ;
 ; -------------------------
