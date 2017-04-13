@@ -13,7 +13,7 @@
 ; When USE_FAST_CLOCK is defined the delays are adjusted
 ; for a 20MHz oscillator.
 ;
-;#define USE_FAST_CLOCK
+#define USE_FAST_CLOCK
 #ifdef USE_FAST_CLOCK  
 #define DELAY_FOR_FAST_CLOCK  call DelayFor18TCY
 #else
@@ -40,8 +40,7 @@ DelayXLCD:
 ; the delays work for a 20MHz clock.
 ;
 #ifdef USE_FAST_CLOCK
-    call  
-  DXLCD0
+    call    DXLCD0
     call    DXLCD0
     call    DXLCD0
     call    DXLCD0
