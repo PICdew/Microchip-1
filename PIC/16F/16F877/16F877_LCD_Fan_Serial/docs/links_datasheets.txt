@@ -1,0 +1,19 @@
+LCD:
+https://cdn-shop.adafruit.com/datasheets/TC1602A-01T.pdf
+
+Fan:
+http://www.delta-fan.com/Download/Spec/THA0412BN.pdf
+https://www.digikey.com/products/en?keywords=THA0412BN
+
+Keypad:
+https://www.sparkfun.com/products/8653
+http://cdn.sparkfun.com/datasheets/Components/General/SparkfunCOM-08653_Datasheet.pdf
+
+ExpressPCB quick turn prototyping:
+https://www.expresspcb.com/
+
+ExpressPCB schematic capture and PCB layout program for Windows:
+http://www.expresspcb.com/wp-content/uploads/formidable/11/ExpressPCBsetup7_5_0.zip
+
+TTL to USB Serial Converter Cables Datasheet:
+http://www.ftdichip.com/Support/Documents/DataSheets/Cables/DS_TTL-232R_CABLES.pdf
