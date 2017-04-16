@@ -1,3 +1,5 @@
+        list    n=0, c=250      ; No page breaks, support long lines in list file
+        errorlevel -302         ; Suppress not in bank zero warning
 ;**********************************************************
 ; projserial.asm
 ;
@@ -10,7 +12,7 @@
 
 config_1 EQU _CP_OFF & _CPD_OFF & _LVP_OFF & _WDT_OFF
 
-config_2 EQU _BODEN_OFF & _PWRTE_OFF & _XT_OSC
+config_2 EQU _BODEN_OFF & _PWRTE_OFF & _HS_OSC
 
         __CONFIG config_1 & config_2
 
