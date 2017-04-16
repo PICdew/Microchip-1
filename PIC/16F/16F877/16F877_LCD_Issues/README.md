@@ -3,6 +3,6 @@
 
 PIC Assembly Language Project
 
-This repository is used to echange information regarding the Microchip forum threag:
+This repository is used to exchange information regarding the Microchip forum thread:
 
 http://www.microchip.com/forums/FindPost/985279
