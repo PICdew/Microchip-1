@@ -11,6 +11,7 @@
 #include "main.inc"
 #include "tick.inc"
 #include "lcd.inc"
+#include "uart.inc"
 #include "buttons.inc"
 ;
 ;                         PIC16F877A
@@ -67,10 +68,19 @@ MAIN_CODE code
 main:
     lcall   Tick_Init
     lcall   LCD_Init
+    lcall   Uart_Init
     lcall   Button_Init
     bsf     INTCON,PEIE
     bsf     INTCON,GIE
-
+;
+; Send initial message to UART
+;
+    movlw   LOW(Uart_message1)
+    movwf   Uart_pszRomStr
+    movlw   HIGH(Uart_message1)
+    movwf   Uart_pszRomStr+1
+    lcall   Uart_Putrs
+    
     lgoto   lcdTest
 
 ;
@@ -117,6 +127,10 @@ lcdTestRestart:
 ; Wait for key event.
 ;
 TestLoop:
+    lcall   Uart_GetcStatus
+    pagesel TestLoop
+    skpnz
+    goto    UartEchoTest
     lcall   Button_GetStatus
     pagesel TestLoop
     skpnz
@@ -125,6 +139,13 @@ TestLoop:
     skpnz
     goto    lcdTestNextState
     goto    TestLoop
+;
+;
+;
+UartEchoTest:
+    lcall   Uart_Getc
+    lcall   Uart_Putc
+    lgoto   TestLoop
 ;
 ; Display 16 character on LCD line 2.
 ;
@@ -166,7 +187,7 @@ lcdTestWriteLoop:
     goto    TestLoop
 
 ;
-; LCD messages
+; Text messages
 ;
 MAIN_CONST   code
 LCD_message_BlankLine:
@@ -177,4 +198,8 @@ LCD_message5:
     dt  "Symbols:        ",0
 LCD_message6:
     dt  "BusyBitMask:0x  ",0
+Uart_message1:
+    dt  CR,LF
+    dt  "UART Echo test",CR,LF,0
+
     END
