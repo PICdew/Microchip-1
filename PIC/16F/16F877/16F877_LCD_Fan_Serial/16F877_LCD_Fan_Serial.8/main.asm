@@ -54,7 +54,7 @@
 ;
 ;
 MAIN_DATA udata
-lcdTestCount        res 1
+LcdTestCount        res 1
 
 
 MAIN_CODE code
@@ -81,7 +81,7 @@ main:
     movwf   Uart_pszRomStr+1
     lcall   Uart_Putrs
     
-    lgoto   lcdTest
+    lgoto   LcdTest
 
 ;
 ; LCD test
@@ -94,7 +94,7 @@ main:
 ; the LCD character set 16 characters at
 ; a time for each key event.
 ;
-lcdTest:
+LcdTest:
     movlw   LINE_ONE
     lcall   LCD_SetDDRamAddr
 
@@ -106,7 +106,7 @@ lcdTest:
 ;
 ; Blank second line of LCD
 ;
-lcdTestRestart:
+LcdTestRestart:
     movlw   LINE_TWO
     lcall   LCD_SetDDRamAddr
 
@@ -121,35 +121,34 @@ lcdTestRestart:
     movf    LCD_BusyBit,W
     lcall   LCD_PutHex
 
-    banksel lcdTestCount
-    clrf    lcdTestCount
+    banksel LcdTestCount
+    clrf    LcdTestCount
 ;
 ; Wait for key event.
 ;
 TestLoop:
-    lcall   Uart_GetcStatus
-    pagesel TestLoop
-    skpnz
-    goto    UartEchoTest
+    call    UartEchoTest
     lcall   Button_GetStatus
     pagesel TestLoop
     skpnz
     goto    TestLoop
     xorlw   BUTTON_S2_CHANGE_MASK | BUTTON_S2_STATE_MASK
     skpnz
-    goto    lcdTestNextState
+    goto    LcdTestNextState
     goto    TestLoop
 ;
 ;
 ;
 UartEchoTest:
+    lcall   Uart_GetcStatus
+    skpnz
+    return
     lcall   Uart_Getc
-    lcall   Uart_Putc
-    lgoto   TestLoop
+    lgoto   Uart_Putc
 ;
 ; Display 16 character on LCD line 2.
 ;
-lcdTestNextState:
+LcdTestNextState:
     movlw   LINE_ONE
     lcall   LCD_SetDDRamAddr
 
@@ -161,29 +160,29 @@ lcdTestNextState:
 
     movlw   LINE_ONE+D'9'
     lcall   LCD_SetDDRamAddr
-    banksel lcdTestCount
-    movf    lcdTestCount,W
+    banksel LcdTestCount
+    movf    LcdTestCount,W
     lcall   LCD_PutDec
     movlw   '-'
     lcall   LCD_WriteData
-    movf    lcdTestCount,W
+    movf    LcdTestCount,W
     addlw   D'15'
     lcall   LCD_PutDec
 
     movlw   LINE_TWO
     lcall   LCD_SetDDRamAddr
-lcdTestWriteLoop:
-    banksel lcdTestCount
-    movf    lcdTestCount,W
+LcdTestWriteLoop:
+    banksel LcdTestCount
+    movf    LcdTestCount,W
     lcall   LCD_WriteData
 
     pagesel TestLoop
-    banksel lcdTestCount
-    incf    lcdTestCount,F
-    movf    lcdTestCount,W
+    banksel LcdTestCount
+    incf    LcdTestCount,F
+    movf    LcdTestCount,W
     andlw   0x0F
     skpz
-    goto    lcdTestWriteLoop
+    goto    LcdTestWriteLoop
     goto    TestLoop
 
 ;
