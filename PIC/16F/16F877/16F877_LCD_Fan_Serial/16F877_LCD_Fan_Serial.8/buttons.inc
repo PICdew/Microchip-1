@@ -12,9 +12,9 @@
 ;
 ; Declare the public symbols
 ;
-    ExtSymbol   ButtonInit
-    ExtSymbol   ButtonGetStatus
-    ExtSymbol   ButtonPoll
+    ExtSymbol   Button_Init
+    ExtSymbol   Button_GetStatus
+    ExtSymbol   Button_Poll
 
 ; end of public symbols
 #undefine ExtSymbol

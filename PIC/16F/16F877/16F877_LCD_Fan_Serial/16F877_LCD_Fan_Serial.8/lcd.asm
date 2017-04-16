@@ -6,14 +6,14 @@
 #include "main.inc"
 #include "lcd.inc"
 ;
-; This code assumes a oscillator of 4MHz
+; This code assumes a oscillator of 8MHz
 ;
 ; The the fastest oscillator a PIC16F877A can use is 20MHz.
 ;
 ; When USE_FAST_CLOCK is defined the delays are adjusted
 ; for a 20MHz oscillator.
 ;
-#define USE_FAST_CLOCK
+;#define USE_FAST_CLOCK
 #ifdef USE_FAST_CLOCK  
 #define DELAY_FOR_FAST_CLOCK  call DelayFor18TCY
 #else
@@ -27,9 +27,10 @@
 ;   It will not work for PIC16F873/PIC16F874/PIC16F873A/PIC16F874A.
 ;
 LCD_DATA    UDATA_SHR
+            res     1
 LCD_byte    res     1       ; byte sent to or read from LCD
 LCD_BusyBit res     1       ; Mask of where the BUSY bit is located
-pszLCD_RomStr res   2       ; pointer to ASCIIZ string in ROM
+LCD_pszRomStr res   2       ; pointer to ASCIIZ string in ROM
 
 LCD_CODE code
 
@@ -73,7 +74,7 @@ DelayPORXLCD:
     call    DelayXLCD
     goto    DelayXLCD
 ;
-; Function Name:  BusyXLCD                                  
+; Function Name:  LCD_Busy                                  
 ; Return Value:   W = Not zero when status of LCD controller is busy 
 ; Parameters:     void                                      
 ; Description:    This routine reads the busy status of the 
@@ -87,7 +88,7 @@ DelayPORXLCD:
 ;  This code has been tested with a Novatek 7605
 ;  and the real Hitachi HD44780.
 ;
-BusyXLCD:
+LCD_Busy:
     movf    LCD_BusyBit,F   ; Check if busy bit avaliable.
     bz      DelayPORXLCD    ; Use a 15ms delay when busy not available.
 
@@ -112,11 +113,11 @@ BusyXLCD:
 
     bcf     E_PIN
     andlw   (LCD_DATA_BITS&(~LCD_DATA_BITS>>1))
-    bnz     BusyXLCD
+    bnz     LCD_Busy
     return
 ;
 ; Send a byte to LCD using 4-bit mode
-BytePutLCD:
+LCD_PutByte:
     banksel BANK1
     movlw   ~LCD_DATA_BITS
     andwf   LCD_PORT,F      ; Make LCD port bits outputs
@@ -150,7 +151,7 @@ BytePutLCD:
     return
 ;
 ; Read a byte to LCD using 4-bit mode
-ByteGetLCD:
+LCD_GetByte:
     bsf     RW_PIN
 ;
 ; read first 4-bits
@@ -172,53 +173,53 @@ ByteGetLCD:
     movf    LCD_byte,W
     return
 ; 
-; Function Name:  SetCGRamAddr                               
+; Function Name:  LCD_SetCGRamAddr                               
 ; Return Value:   void                                       
 ; Parameters:     W = character generator ram address    
 ; Description:    This routine sets the character generator  
 ;                 address of the Hitachi HD44780 LCD         
 ;                 controller.
 ;
-SetCGRamAddr:
+LCD_SetCGRamAddr:
     iorlw   0x40            ; Write cmd and address to port
     movwf   LCD_byte        ; save byte going to LCD
 
-    call    BusyXLCD
+    call    LCD_Busy
 
     bcf     RS_PIN
-    goto    BytePutLCD
+    goto    LCD_PutByte
 
 ;
-; Function Name:  SetDDRamAddr                              
+; Function Name:  LCD_SetDDRamAddr                              
 ; Return Value:   void                                      
 ; Parameters:     W = display data address              
 ; Description:    This routine sets the display data address
 ;                 of the Hitachi HD44780 LCD controller.
 ;
-SetDDRamAddr:
+LCD_SetDDRamAddr:
     iorlw   0x80            ; Write cmd and address to port
     movwf   LCD_byte        ; save byte going to LCD
 
-    call    BusyXLCD
+    call    LCD_Busy
 
     bcf     RS_PIN
-    goto    BytePutLCD
+    goto    LCD_PutByte
 ;
-; Function Name:  WriteCmdXLCD                                
+; Function Name:  LCD_WriteCmd                                
 ; Return Value:   void                                        
 ; Parameters:     W = command to send to LCD                 
 ; Description:    This routine writes a command to the Hitachi
 ;                 HD44780 LCD controller.
 ; 
-WriteCmdXLCD:
+LCD_WriteCmd:
     movwf   LCD_byte        ; save byte going to LCD
 
-    call    BusyXLCD
+    call    LCD_Busy
 
     bcf     RS_PIN
-    goto    BytePutLCD
+    goto    LCD_PutByte
 ;
-; Function Name:  WriteDataXLCD                               
+; Function Name:  LCD_WriteData                               
 ; Return Value:   void                                        
 ; Parameters:     W = data byte to be written to LCD        
 ; Description:    This routine writes a data byte to the      
@@ -227,17 +228,17 @@ WriteCmdXLCD:
 ;                 the display data RAM depending on what the  
 ;                 previous SetxxRamAddr routine was called.   
 ;
-WriteDataXLCD:
+LCD_WriteData:
     movwf   LCD_byte        ; save byte going to LCD
 
-    call    BusyXLCD
+    call    LCD_Busy
 
     bsf     RS_PIN
-    call    BytePutLCD
+    call    LCD_PutByte
     bcf     RS_PIN
     return
 ;
-; Function Name:  OpenXLCD                                  
+; Function Name:  LCD_Init                                  
 ; Return Value:   void                                      
 ; Parameters:     W = sets the type of LCD (lines)     
 ; Description:    This routine configures the LCD. Based on 
@@ -246,9 +247,8 @@ WriteDataXLCD:
 ;                 microcontroller, setup the LCD for 4-bit 
 ;                 mode and clear the display.
 ;
-OpenXLCD:
+LCD_Init:
     clrf    LCD_BusyBit
-    movwf   LCD_byte
     banksel BANK1
     movlw   ~LCD_DATA_BITS
     andwf   LCD_PORT,F      ; Make LCD data bus an output
@@ -291,32 +291,32 @@ OpenXLCD:
     iorwf   LCD_PORT,F
     banksel BANK0
 
-    movf    LCD_byte,W
+    movlw   LCD_FORMAT
     andlw   0x0F            ; Allow only 4-bit mode for
     iorlw   0x20            ; HD44780 LCD controller.
-    call    WriteCmdXLCD
+    call    LCD_WriteCmd
     
     movlw   (DOFF & CURSOR_OFF & BLINK_OFF)
-    call    WriteCmdXLCD
+    call    LCD_WriteCmd
 
     movlw   (DON & CURSOR_OFF & BLINK_OFF)
-    call    WriteCmdXLCD
+    call    LCD_WriteCmd
 
     movlw   (0x01)          ; Clear display
-    call    WriteCmdXLCD
+    call    LCD_WriteCmd
 
     movlw   (SHIFT_CUR_LEFT)
-    call    WriteCmdXLCD
+    call    LCD_WriteCmd
 ;
 ; Find position of busy bit
 ; Required when using 4-bit mode.
 ;
     movlw   LINE_ONE+1      
-    call    SetDDRamAddr
+    call    LCD_SetDDRamAddr
 
-    call    BusyXLCD
+    call    LCD_Busy
 
-    call    ByteGetLCD
+    call    LCD_GetByte
     xorlw   0x01
     skpnz
     bsf     LCD_BusyBit,7
@@ -327,138 +327,138 @@ OpenXLCD:
 ; Initialize CGRAM
 ;
     clrw    
-    call    SetCGRamAddr
+    call    LCD_SetCGRamAddr
     movlw   LOW(CGRAM_Table)
-    movwf   pszLCD_RomStr
+    movwf   LCD_pszRomStr
     movlw   HIGH(CGRAM_Table)
-    movwf   pszLCD_RomStr+1
-    call    putrsXLCD
+    movwf   LCD_pszRomStr+1
+    call    LCD_putrs
 ;
 ; Put cursor on line one, left most position
 ;
     movlw   LINE_ONE
-    call    SetDDRamAddr
+    call    LCD_SetDDRamAddr
 
     return
 ;
-; Function Name:  PutHexXLCD
+; Function Name:  LCD_PutHex
 ; Return Value:   void
 ; Parameters:     W = 8-bit value to send to LCD
 ; Description:    Writes two ASCII character of the
 ;                 hexadecimal value in thw W register.
 ;
-PutHexXLCD:
-        movwf   pszLCD_RomStr
-        swapf   pszLCD_RomStr,W
-        call    PutHexNibbleXLCD
-        movf    pszLCD_RomStr,W
-PutHexNibbleXLCD:
+LCD_PutHex:
+        movwf   LCD_pszRomStr
+        swapf   LCD_pszRomStr,W
+        call    LCD_PutHexNibble
+        movf    LCD_pszRomStr,W
+LCD_PutHexNibble:
         andlw   0x0F
         addlw   0x06
         btfsc   STATUS,DC
         addlw   'A'-'0'-d'10'
         addlw   '0'-d'6'   
-        call    WriteDataXLCD
-        movf    pszLCD_RomStr,W
+        call    LCD_WriteData
+        movf    LCD_pszRomStr,W
         return
 ;
-; Function Name:  PutDecXLCD
+; Function Name:  LCD_PutDec
 ; Return Value:   void
 ; Parameters:     W = 8-bit value to send to LCD
 ; Description:    Writes three ASCII character of the
 ;                 decimal value in thw W register.
 ;
-PutDecXLCD:
-        clrf    pszLCD_RomStr+1
+LCD_PutDec:
+        clrf    LCD_pszRomStr+1
 
         addlw   d'256'-d'200'
         skpnc
-        bsf     pszLCD_RomStr+1,1
+        bsf     LCD_pszRomStr+1,1
         skpc
         addlw   d'200'
         
         addlw   d'256'-d'100'
         skpnc
-        bsf     pszLCD_RomStr+1,0
+        bsf     LCD_pszRomStr+1,0
         skpc
         addlw   d'100'
         
-        movwf   pszLCD_RomStr       ; save output value less than 100
+        movwf   LCD_pszRomStr       ; save output value less than 100
         
         movlw   0x1F
-        andwf   pszLCD_RomStr+1,W
-        bsf     pszLCD_RomStr+1,5
+        andwf   LCD_pszRomStr+1,W
+        bsf     LCD_pszRomStr+1,5
         skpz
-        bsf     pszLCD_RomStr+1,4
-        movf    pszLCD_RomStr+1,W
-        btfsc   pszLCD_RomStr+1,4
-        call    WriteDataXLCD       ; output 100's digit
+        bsf     LCD_pszRomStr+1,4
+        movf    LCD_pszRomStr+1,W
+        btfsc   LCD_pszRomStr+1,4
+        call    LCD_WriteData       ; output 100's digit
         movlw   0x10
-        andwf   pszLCD_RomStr+1,F
+        andwf   LCD_pszRomStr+1,F
 
-        movf    pszLCD_RomStr,W
+        movf    LCD_pszRomStr,W
         addlw   d'256'-d'80'
         skpnc
-        bsf     pszLCD_RomStr+1,3
+        bsf     LCD_pszRomStr+1,3
         skpc
         addlw   d'80'
         
         addlw   d'256'-d'40'
         skpnc
-        bsf     pszLCD_RomStr+1,2
+        bsf     LCD_pszRomStr+1,2
         skpc
         addlw   d'40'
         
         addlw   d'256'-d'20'
         skpnc
-        bsf     pszLCD_RomStr+1,1
+        bsf     LCD_pszRomStr+1,1
         skpc
         addlw   d'20'
         
         addlw   d'256'-d'10'
         skpnc
-        bsf     pszLCD_RomStr+1,0
+        bsf     LCD_pszRomStr+1,0
         skpc
         addlw   d'10'
-        movwf   pszLCD_RomStr
+        movwf   LCD_pszRomStr
 
         movlw   0x1F
-        andwf   pszLCD_RomStr+1,W
-        bsf     pszLCD_RomStr+1,5
+        andwf   LCD_pszRomStr+1,W
+        bsf     LCD_pszRomStr+1,5
         skpz
-        bsf     pszLCD_RomStr+1,4
-        movf    pszLCD_RomStr+1,W
-        btfsc   pszLCD_RomStr+1,4
-        call    WriteDataXLCD       ; output 10's digit
+        bsf     LCD_pszRomStr+1,4
+        movf    LCD_pszRomStr+1,W
+        btfsc   LCD_pszRomStr+1,4
+        call    LCD_WriteData       ; output 10's digit
         movlw   '0'
-        addwf   pszLCD_RomStr,W
-        call    WriteDataXLCD       ; output 1's digit
+        addwf   LCD_pszRomStr,W
+        call    LCD_WriteData       ; output 1's digit
         return
 ;
-; Function Name:  putrsXLCD
+; Function Name:  LCD_putrs
 ; Return Value:   void
-; Parameters:     pszLCD_RomStr: pointer to string
+; Parameters:     LCD_pszRomStr: pointer to string
 ; Description:    This routine writes a string of bytes to the
 ;                 Hitachi HD44780 LCD controller. The data
 ;                 is written to the character generator RAM or
 ;                 the display data RAM depending on what the
 ;                 previous SetxxRamAddr routine was called.
 ;
-putrsXLCD:
+LCD_putrs:
     call    TableLookUp
     iorlw   0
     skpnz
     return
-    call    WriteDataXLCD
-    incf    pszLCD_RomStr,F
+    call    LCD_WriteData
+    incf    LCD_pszRomStr,F
     skpnz
-    incf    pszLCD_RomStr+1,F
-    goto    putrsXLCD
+    incf    LCD_pszRomStr+1,F
+    goto    LCD_putrs
     
 TableLookUp:
-    movfw   pszLCD_RomStr+1
+    movfw   LCD_pszRomStr+1
     movwf   PCLATH
-    movfw   pszLCD_RomStr
+    movfw   LCD_pszRomStr
     movwf   PCL
 ;
 ; This table is used to write

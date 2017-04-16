@@ -12,15 +12,15 @@
 ;
 ; Declare the public symbols
 ;
-    ExtSymbol   pszLCD_RomStr
-    ExtSymbol   SetCGRamAddr
-    ExtSymbol   SetDDRamAddr
-    ExtSymbol   WriteCmdXLCD
-    ExtSymbol   WriteDataXLCD
-    ExtSymbol   OpenXLCD
-    ExtSymbol   PutHexXLCD
-    ExtSymbol   PutDecXLCD
-    ExtSymbol   putrsXLCD
+    ExtSymbol   LCD_pszRomStr
+    ExtSymbol   LCD_SetCGRamAddr
+    ExtSymbol   LCD_SetDDRamAddr
+    ExtSymbol   LCD_WriteCmd
+    ExtSymbol   LCD_WriteData
+    ExtSymbol   LCD_Init
+    ExtSymbol   LCD_PutHex
+    ExtSymbol   LCD_PutDec
+    ExtSymbol   LCD_putrs
     ExtSymbol   LCD_BusyBit
 
 ; end of public symbols
@@ -33,6 +33,7 @@
 #define RS_PIN        PORTD,4
 #define LCD_DATA_BITS 0x0F
 #define LCD_PORT      PORTD
+#define LCD_FORMAT    (FOUR_BIT&LINES_5X7)
 
 ;#define USE_FAST_CLOCK
 ;

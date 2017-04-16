@@ -9,6 +9,7 @@
 ; -------------------------
 #define MAIN_ASM
 #include "main.inc"
+#include "tick.inc"
 #include "lcd.inc"
 #include "buttons.inc"
 ;
@@ -28,8 +29,8 @@
 ;       GND -> 12 : VSS               RD6 : 29 -> LCD_E
 ; 8MHz XTAL -> 13 : OSC1              RD5 : 28 -> LCD_RW
 ; 8MHz XTAL <- 14 : OSC2              RD4 : 27 -> LCD_RS
-;           <> 15 : RC0/SOSCO   RX/DT/RC7 : 26 <- RXD
-;           <> 16 : RC1/SOSCI   TX/CK/RC6 : 25 -> TXD
+;           <> 15 : RC0/T1CKI   RX/DT/RC7 : 26 <- RXD
+;           <> 16 : RC1/CCP2    TX/CK/RC6 : 25 -> TXD
 ;    BUZZER <> 17 : RC2/CCP1          RC5 : 24 <>
 ;       SCL <> 18 : RC3/SCL       SDA/RC4 : 23 <> SDA
 ;    LCD_D4 <> 19 : RD0               RD3 : 22 <> LCD_D7
@@ -64,9 +65,11 @@ MAIN_CODE code
 ; and more than one line.
 ;
 main:
-    movlw   (FOUR_BIT&LINES_5X7)
-    lcall   OpenXLCD
-    lcall   ButtonInit
+    lcall   Tick_Init
+    lcall   LCD_Init
+    lcall   Button_Init
+    bsf     INTCON,PEIE
+    bsf     INTCON,GIE
 
     lgoto   lcdTest
 
@@ -83,30 +86,30 @@ main:
 ;
 lcdTest:
     movlw   LINE_ONE
-    lcall   SetDDRamAddr
+    lcall   LCD_SetDDRamAddr
 
     movlw   LOW(LCD_message4)
-    movwf   pszLCD_RomStr
+    movwf   LCD_pszRomStr
     movlw   HIGH(LCD_message4)
-    movwf   pszLCD_RomStr+1
-    lcall   putrsXLCD
+    movwf   LCD_pszRomStr+1
+    lcall   LCD_putrs
 ;
 ; Blank second line of LCD
 ;
 lcdTestRestart:
     movlw   LINE_TWO
-    lcall   SetDDRamAddr
+    lcall   LCD_SetDDRamAddr
 
     movlw   LOW(LCD_message6)
-    movwf   pszLCD_RomStr
+    movwf   LCD_pszRomStr
     movlw   HIGH(LCD_message6)
-    movwf   pszLCD_RomStr+1
-    lcall   putrsXLCD
+    movwf   LCD_pszRomStr+1
+    lcall   LCD_putrs
 
     movlw   LINE_TWO+D'14'
-    lcall   SetDDRamAddr
+    lcall   LCD_SetDDRamAddr
     movf    LCD_BusyBit,W
-    lcall   PutHexXLCD
+    lcall   LCD_PutHex
 
     banksel lcdTestCount
     clrf    lcdTestCount
@@ -114,61 +117,53 @@ lcdTestRestart:
 ; Wait for key event.
 ;
 TestLoop:
-    lcall   ButtonGetStatus
+    lcall   Button_GetStatus
     pagesel TestLoop
     skpnz
-    goto    TestContinue
+    goto    TestLoop
     xorlw   BUTTON_S2_CHANGE_MASK | BUTTON_S2_STATE_MASK
     skpnz
     goto    lcdTestNextState
-;
-; Wait for millisecond tick
-;
-TestContinue:
-    btfss   INTCON,T0IF
     goto    TestLoop
-    bcf     INTCON,T0IF
-    lcall   ButtonPoll
-    lgoto   TestLoop
 ;
 ; Display 16 character on LCD line 2.
 ;
 lcdTestNextState:
     movlw   LINE_ONE
-    lcall   SetDDRamAddr
+    lcall   LCD_SetDDRamAddr
 
     movlw   LOW(LCD_message5)
-    movwf   pszLCD_RomStr
+    movwf   LCD_pszRomStr
     movlw   HIGH(LCD_message5)
-    movwf   pszLCD_RomStr+1
-    lcall   putrsXLCD
+    movwf   LCD_pszRomStr+1
+    lcall   LCD_putrs
 
     movlw   LINE_ONE+D'9'
-    lcall   SetDDRamAddr
+    lcall   LCD_SetDDRamAddr
     banksel lcdTestCount
     movf    lcdTestCount,W
-    lcall   PutDecXLCD
+    lcall   LCD_PutDec
     movlw   '-'
-    lcall   WriteDataXLCD
+    lcall   LCD_WriteData
     movf    lcdTestCount,W
     addlw   D'15'
-    lcall   PutDecXLCD
+    lcall   LCD_PutDec
 
     movlw   LINE_TWO
-    lcall   SetDDRamAddr
+    lcall   LCD_SetDDRamAddr
 lcdTestWriteLoop:
     banksel lcdTestCount
     movf    lcdTestCount,W
-    lcall   WriteDataXLCD
-    pagesel TestLoop
+    lcall   LCD_WriteData
 
+    pagesel TestLoop
     banksel lcdTestCount
     incf    lcdTestCount,F
     movf    lcdTestCount,W
     andlw   0x0F
     skpz
     goto    lcdTestWriteLoop
-    goto    TestContinue
+    goto    TestLoop
 
 ;
 ; LCD messages

@@ -18,7 +18,7 @@ BUTTON_CODE code
 ; ButtonGetStatus
 ; Returns Button status byte in the WREG
 ;
-ButtonGetStatus:
+Button_GetStatus:
     banksel ButtonStatus
     movf    ButtonStatus,W
     andlw   BUTTON_S2_CHANGE_MASK | BUTTON_S3_CHANGE_MASK
@@ -30,7 +30,7 @@ ButtonGetStatus:
 ; Poll the button inputs.
 ; To be called once per millisecond
 ;
-ButtonPoll:
+Button_Poll:
     banksel ButtonStatus
     clrw
     btfss   ButtonS2    ; Skip if S2 not pressed
@@ -63,7 +63,7 @@ ButtonPoll:
 ; ButtonInit
 ; Setup PICDEM2 Plus button inputs
 ;
-ButtonInit:
+Button_Init:
     banksel BANK1
     bsf     ButtonS2    ; Make GPIO for switch S2 an input
     bsf     ButtonS3    ; Make GPIO for switch S3 an input
