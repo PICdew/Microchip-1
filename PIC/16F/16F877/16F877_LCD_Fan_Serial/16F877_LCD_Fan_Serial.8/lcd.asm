@@ -27,7 +27,6 @@
 ;   It will not work for PIC16F873/PIC16F874/PIC16F873A/PIC16F874A.
 ;
 LCD_DATA    UDATA_SHR
-            res     1
 LCD_byte    res     1       ; byte sent to or read from LCD
 LCD_BusyBit res     1       ; Mask of where the BUSY bit is located
 LCD_pszRomStr res   2       ; pointer to ASCIIZ string in ROM

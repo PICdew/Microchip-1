@@ -14,6 +14,21 @@
 ; Define these in just one file.
 ;
     __CONFIG _FOSC_HS & _WDTE_OFF & _PWRTE_OFF & _BOREN_OFF & _LVP_OFF & _CPD_OFF & _WRT_OFF & _CP_OFF
+;
+; There is a bug in the MPLAB v8.92 linker that
+; does not honor the reserved debug memory when
+; the PICkit2 is used for In-Circuit-Debug.
+;
+#ifdef __DEBUG
+  #ifdef __MPLAB_DEBUGGER_PICKIT2
+DBG_SHR UDATA_SHR 0x070
+    res 1
+DBG_DATA UDATA 0x1E5
+    res 0x0b
+DBG_CODE CODE 0x1F00
+    res 0x100
+ #endif
+#endif
 
 ;**********************************************************************
 RESET_VECTOR CODE 0x000         ; processor reset vector
@@ -24,6 +39,7 @@ RESET_VECTOR CODE 0x000         ; processor reset vector
 
 ;------------------------------------------------------------------------
 START_CODE CODE
+
 start:
     clrf    INTCON              ; Disable all interrupt sources
     banksel BANK1
@@ -44,6 +60,10 @@ start:
     
     movlw   b'11111111'         ; 
     movwf   TRISD
+
+    movlw   b'00001011'
+    movwf   TRISE
+
 #ifdef __16F877A
     ; disable comparators
     movlw   b'00000111'

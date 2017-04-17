@@ -9,9 +9,12 @@
 ; -------------------------
 #define MAIN_ASM
 #include "main.inc"
+#include "math.inc"
 #include "tick.inc"
+#include "pwm.inc"
 #include "lcd.inc"
 #include "uart.inc"
+#include "rpm.inc"
 #include "buttons.inc"
 ;
 ;                         PIC16F877A
@@ -67,6 +70,8 @@ MAIN_CODE code
 ;
 main:
     lcall   Tick_Init
+    lcall   Pwm_Init
+    lcall   Rpm_Init
     lcall   LCD_Init
     lcall   Uart_Init
     lcall   Button_Init
@@ -127,7 +132,8 @@ LcdTestRestart:
 ; Wait for key event.
 ;
 TestLoop:
-    call    UartEchoTest
+    lcall   UartPwmCommandTest
+    lcall   RpmTest
     lcall   Button_GetStatus
     pagesel TestLoop
     skpnz
@@ -139,12 +145,21 @@ TestLoop:
 ;
 ;
 ;
-UartEchoTest:
+UartPwmCommandTest:
     lcall   Uart_GetcStatus
     skpnz
     return
     lcall   Uart_Getc
-    lgoto   Uart_Putc
+    pagesel Pwm_DutyCycleUp
+    xorlw   '+'
+    skpnz
+    goto    Pwm_DutyCycleUp
+    xorlw   '+'
+    xorlw   '-'
+    skpnz
+    goto    Pwm_DutyCycleDown
+    return
+
 ;
 ; Display 16 character on LCD line 2.
 ;
@@ -184,7 +199,97 @@ LcdTestWriteLoop:
     skpz
     goto    LcdTestWriteLoop
     goto    TestLoop
+;
+;
+;
+#define K1 (D'15000')
+RpmTest:
+    lcall   Rpm_Status
+    skpz
+    return
 
+    bankisel Pwm_DutyCycle  ; copy pulse count
+    movlw   Pwm_DutyCycle   ; to Bin2BCD binary register
+    movwf   FSR
+    movf    INDF,W
+    banksel A_reg
+    movwf   A_reg
+    incf    FSR,F
+    movf    INDF,W
+    movwf   A_reg+1
+    lcall   Bin2BCD
+
+    movlw   'P'
+    lcall   Uart_Putc
+    movlw   'W'
+    call    Uart_Putc
+    movlw   'M'
+    call    Uart_Putc
+    movlw   ':'
+    call    Uart_Putc
+    bankisel D_reg
+    movlw   D_reg+1
+    movwf   FSR
+    movf    INDF,W
+    call    Uart_PutHex
+    decf    FSR,F
+    movf    INDF,W
+    call    Uart_PutHex
+    movlw   ' '
+    call    Uart_Putc
+
+    bankisel Rpm_PulseCount ; copy pulse count
+    movlw   Rpm_PulseCount  ; to multiply register
+    movwf   FSR
+    movf    INDF,W
+    banksel B_reg
+    movwf   B_reg
+    incf    FSR,F
+    movf    INDF,W
+    movwf   B_reg+1
+
+    banksel A_reg
+    movlw   LOW (K1)        ; load RPM converion factor
+    movwf   A_reg           ; in multiplier register
+    movlw   HIGH(K1)
+    movwf   A_reg+1
+
+    lcall   uMutiply_16x16  ; Do the multiply to get RPM * 256
+
+    movf    D_reg+1,W       ; Divide by 256
+    movwf   A_reg+0
+    movf    D_reg+2,W
+    movwf   A_reg+1
+    lcall   Bin2BCD         ; Convert to BCD
+
+    movlw   'R'
+    lcall   Uart_Putc
+    movlw   'P'
+    call    Uart_Putc
+    movlw   'M'
+    call    Uart_Putc
+    movlw   ':'
+    call    Uart_Putc
+
+    bankisel D_reg          ; Display the result
+    movlw   D_reg+2
+    movwf   FSR
+    movf    INDF,W
+    lcall   Uart_PutHex
+    decf    FSR,F
+    movf    INDF,W
+    call    Uart_PutHex
+    decf    FSR,F
+    movf    INDF,W
+    call    Uart_PutHex
+    movlw   CR
+    call    Uart_Putc
+    movlw   LF
+    call    Uart_Putc
+
+    lcall   Rpm_Start       ; start next pulse count period
+
+    return
 ;
 ; Text messages
 ;
@@ -199,6 +304,7 @@ LCD_message6:
     dt  "BusyBitMask:0x  ",0
 Uart_message1:
     dt  CR,LF
-    dt  "UART Echo test",CR,LF,0
+    dt  "UART PWM command ",CR,LF
+    dt  "test:+=up, -=down",CR,LF,0
 
     END

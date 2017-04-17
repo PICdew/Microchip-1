@@ -6,6 +6,7 @@
 #include "main.inc"
 #include "isr.inc"
 #include "tick.inc"
+#include "rpm.inc"
 #include "buttons.inc"
 ;
 ; This RAM is used by the Interrupt Servoce Routine
@@ -26,6 +27,7 @@ w_temp      RES     1   ; variable used for context saving
 ISR_VAR     UDATA
 status_temp RES     1   ; variable used for context saving
 pclath_temp RES     1   ; variable used for context saving
+fsr_temp    RES     1   ; variable used for context saving
 
 ISR_VECTOR code 0x004                       ; interrupt vector location
 
@@ -35,13 +37,38 @@ INTERRUPT:
     banksel status_temp
     movwf   status_temp                     ; save off contents of STATUS register
     movf    PCLATH,W                        
-    movwf   pclath_temp                     
+    movwf   pclath_temp                     ; Save PCLATCH register
+    movf    FSR,W
+    movwf   fsr_temp                        ; Save File Select Register
     movlw   HIGH(INTERRUPT)                 ; Set program page to the curent page so 
     movwf   PCLATH                          ; that GOTO and CALL branch to this page
-
-
-; isr code can go here or be located as a called subroutine elsewhere
-
+;
+; Handle INT interrupts
+;
+ISR_INT:
+    btfss   INTCON,INTE                     ; Skip if external interrupt is emabled
+    goto    ISR_INT_Done
+    btfss   INTCON,INTF
+    goto    ISR_INT_Done
+;
+    banksel OPTION_REG
+    movlw   (1<<INTEDG)
+    xorwf   OPTION_REG,F
+    bcf     INTCON,INTF                     ; Clear external interrupt request
+    banksel PORTE
+    movlw   (1<<RE2)
+    xorwf   PORTE,F
+;
+; The external interrupt is used to count
+; pulses from the fan speed output.
+;
+    movlw   1
+    banksel Rpm_PulseCount
+    addwf   Rpm_PulseCount,F
+    skpnc
+    addwf   Rpm_PulseCount+1,F
+ISR_INT_Done:
+;
 ;
 ; Handle TIMER0 interrupts
 ;
@@ -57,10 +84,27 @@ ISR_TMR0:
 ;
     lcall   Button_Poll
     pagesel ISR_TMR0
-    banksel SystemTickTimeout
+;
+; Decrement the RPM period timeout
+;
+    btfss   INTCON,INTE
+    goto    ISR_TMR0_RpmDone
+
+    banksel Rpm_CountTimeout
+    movf    Rpm_CountTimeout+0,W            ; Test the Rpm_CountTimeout for zero and
+    iorwf   Rpm_CountTimeout+1,W
+    skpz                                    ; decrement it by one when it is not zero.
+    movlw   0xFF
+    addwf   Rpm_CountTimeout+0,F
+    skpc
+    addwf   Rpm_CountTimeout+1,F
+    skpc
+    bcf     INTCON,INTE                     ; Stop counting pulses at end of RPM count period
+ISR_TMR0_RpmDone:
 ;
 ; Decrement the system tick timeout
 ;
+    banksel SystemTickTimeout
     movf    SystemTickTimeout+1,W           ; Test the SystemTickTimeout for zero and
     iorwf   SystemTickTimeout,W             ; decrement it by one when it is not zero.
     skpz                                    ;
@@ -72,6 +116,8 @@ ISR_TMR0_Done:
 ;
 
     banksel status_temp
+    movf    fsr_temp,W
+    movwf   FSR
     movf    pclath_temp,W                   
     movwf   PCLATH                          
     movf    status_temp,w                   ; retrieve copy of STATUS register
