@@ -61,7 +61,7 @@ start:
     movlw   b'11111111'         ; 
     movwf   TRISD
 
-    movlw   b'00001011'
+    movlw   b'00001111'
     movwf   TRISE
 
 #ifdef __16F877A

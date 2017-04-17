@@ -55,9 +55,6 @@ ISR_INT:
     movlw   (1<<INTEDG)
     xorwf   OPTION_REG,F
     bcf     INTCON,INTF                     ; Clear external interrupt request
-    banksel PORTE
-    movlw   (1<<RE2)
-    xorwf   PORTE,F
 ;
 ; The external interrupt is used to count
 ; pulses from the fan speed output.
