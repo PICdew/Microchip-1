@@ -18,5 +18,4 @@ void Tick_Init(void)
     TMR0 = 0;               /* TIMER0 will assert the overflow flag every 256*64 (16384)              */
     INTCONbits.TMR0IF = 0;  /* instruction cycles, with a 12MHz oscilator this is 1.365 milliseconds. */
     INTCONbits.TMR0IE = 1;
-    return;
 }

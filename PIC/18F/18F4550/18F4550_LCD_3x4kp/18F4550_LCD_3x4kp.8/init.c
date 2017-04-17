@@ -111,5 +111,4 @@ void PIC_Init(void) {
     TRISD  = 0x00;
     LATE   = 0x00;
     TRISE |= 0x07;     /* Analog inputs AN5,AN6,AN7 */
-    return;
 }
