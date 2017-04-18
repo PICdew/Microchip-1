@@ -30,3 +30,7 @@ http://ac.els-cdn.com/S1876610216313753/1-s2.0-S1876610216313753-main.pdf?_tid=d
 
 NERD GIRLS, Maximum Power Point Tracker:
 http://www.nerdgirls.org/technical/seniorprojects/mppt/MPPT_final_report.pdf
+
+
+Temperature sensor:
+http://www.ti.com/lit/ds/symlink/lm35.pdf
