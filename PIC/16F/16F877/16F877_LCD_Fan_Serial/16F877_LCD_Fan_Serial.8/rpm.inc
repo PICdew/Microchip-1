@@ -17,6 +17,7 @@
     ExtSymbol   Rpm_Start
     ExtSymbol   Rpm_PulseCount
     ExtSymbol   Rpm_CountTimeout
+    ExtSymbol   Rpm_NoiseFlag
 
 ; end of public symbols
 #undefine ExtSymbol

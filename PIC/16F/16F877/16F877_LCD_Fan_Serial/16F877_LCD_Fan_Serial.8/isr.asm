@@ -51,16 +51,22 @@ ISR_INT:
     btfss   INTCON,INTF
     goto    ISR_INT_Done
 ;
+#ifdef RPM_COUNT_BOTH_EDGES
     banksel OPTION_REG
     movlw   (1<<INTEDG)
     xorwf   OPTION_REG,F
+    banksel BANK0
+#endif
     bcf     INTCON,INTF                     ; Clear external interrupt request
 ;
 ; The external interrupt is used to count
 ; pulses from the fan speed output.
 ;
+    banksel Rpm_NoiseFlag
+    decfsz  Rpm_NoiseFlag,W
+    goto    ISR_INT_Done
+    bsf     Rpm_NoiseFlag,1
     movlw   1
-    banksel Rpm_PulseCount
     addwf   Rpm_PulseCount,F
     skpnc
     addwf   Rpm_PulseCount+1,F
@@ -76,6 +82,9 @@ ISR_TMR0:
     goto    ISR_TMR0_Done
 ;
     bcf     INTCON,TMR0IF                   ; Clear TIMER0 interrupt request
+    banksel Rpm_NoiseFlag
+    decfsz  Rpm_NoiseFlag,W                 ; Complete fan speed pulse noise filter
+    movwf   Rpm_NoiseFlag
 ;
 ; Advance the button debouce state every system tick
 ;

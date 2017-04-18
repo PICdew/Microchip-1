@@ -10,6 +10,7 @@
 RPM_VAR    UDATA
 Rpm_PulseCount   res 2
 Rpm_CountTimeout res 2
+Rpm_NoiseFlag    res 1
 
 RPM_CODE   CODE
 ;
