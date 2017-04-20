@@ -248,7 +248,7 @@ ISR_INT:
     skpz                                    ; skip if enough time since last pulse counted
     goto    ISR_INT_Done
     movlw   RPM_SYSTEM_TICKS_BETWEEN_COUNTS ; Start timeout between pulse counts to help
-    addwf   Rpm_NoiseFlag                   ; reject noise on fan speed pulse output.
+    addwf   Rpm_NoiseFlag,F                 ; reject noise on fan speed pulse output.
     movlw   1               
     addwf   Rpm_PulseCount,F                ; Increment fan speed pulse count
     skpnc
