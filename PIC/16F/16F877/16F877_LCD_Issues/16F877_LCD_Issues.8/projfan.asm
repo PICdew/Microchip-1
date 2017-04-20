@@ -159,11 +159,11 @@
 ; The maximum product we expect is 15000 * 351, or 5265000. This fits in 24-bits.
 ; 
 ;
+#define RPM_SYSTEM_TICKS_BETWEEN_COUNTS (D'3')
 #define MILLISECONDS_IN_ONE_MINUTE (D'60000')
 #define SYSTEM_TICKS_IN_256MS (D'250')
 #define NUMBER_OF_SAMPLE_PERIODS (D'5')
 #define PULSE_PER_REVOLUTION (D'4')
-
 #define RPM_COUNT_PERIOD (SYSTEM_TICKS_IN_256MS*NUMBER_OF_SAMPLE_PERIODS)
 #define K1 (MILLISECONDS_IN_ONE_MINUTE/(NUMBER_OF_SAMPLE_PERIODS*PULSE_PER_REVOLUTION))
 ;
@@ -244,11 +244,13 @@ ISR_INT:
 ; The external interrupt is used to count
 ; pulses from the fan speed output.
 ;
-    decfsz  Rpm_NoiseFlag,W
+    movf    Rpm_NoiseFlag,W
+    skpz                                    ; skip if enough time since last pulse counted
     goto    ISR_INT_Done
-    bsf     Rpm_NoiseFlag,1
-    movlw   1
-    addwf   Rpm_PulseCount,F
+    movlw   RPM_SYSTEM_TICKS_BETWEEN_COUNTS ; Start timeout between pulse counts to help
+    addwf   Rpm_NoiseFlag                   ; reject noise on fan speed pulse output.
+    movlw   1               
+    addwf   Rpm_PulseCount,F                ; Increment fan speed pulse count
     skpnc
     addwf   Rpm_PulseCount+1,F
 ISR_INT_Done:
@@ -262,7 +264,10 @@ ISR_TMR0:
     goto    ISR_TMR0_Done
 ;
     bcf     INTCON,TMR0IF                   ; Clear TIMER0 interrupt request
-    decfsz  Rpm_NoiseFlag,W                 ; Complete fan speed pulse noise filter
+
+    movf    Rpm_NoiseFlag,W                 ; Check if enough ticks since
+    skpz                                    ; since last fans speed pulse
+    decf    Rpm_NoiseFlag,W                 ; has been counted.
     movwf   Rpm_NoiseFlag
 ;
 ; Decrement the RPM period timeout
@@ -275,7 +280,7 @@ ISR_TMR0:
     skpnz
     bcf     INTCON,INTE                     ; Stop counting pulses at end of RPM count period
     skpz                                    ; decrement it by one when it is not zero.
-    movlw   0xFF
+    movlw   -1
     addwf   Rpm_CountTimeout+0,F
     skpc
     addwf   Rpm_CountTimeout+1,F
