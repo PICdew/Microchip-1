@@ -138,34 +138,34 @@
 ; A system tick is 1.024 milliseconds, 250 
 ; ticks is 250 * 1.024 or 256 milliseconds.
 ;
-; To convert Rpm_PulseCount to RPMs we use this forumla:
+; To convert Isr_FanPulseCount to RPMs we use this forumla:
 ;
-; RPM = ((Rpm_PulseCount / Pulses per revolution) / Pulse count period in milliseconds) * Milliseconds in one minute)
+; RPM = ((Isr_FanPulseCount / Pulses per revolution) / Pulse count period in milliseconds) * Milliseconds in one minute)
 ;
-; For fan P/N:AFB0712VHB-F00 there are 2 pulses per revolution.
-; RPM = ((Rpm_PulseCount / 2) / 256) * 60000)
-;     = ((Rpm_PulseCount / 256) * 30000)
-;     = ( Rpm_PulseCount * 30000 / 256 )
+; For fan P/N:AFB0712VHB-F00 there are 2 pulses or 4 edges per revolution.
+; RPM = ((Isr_FanPulseCount / 2) / 256) * 60000)
+;     = ((Isr_FanPulseCount / 256) * 30000)
+;     = ( Isr_FanPulseCount * 30000 / 256 )
 ;
-; For fan P/N:THA0412BN there are 4 pulses per revolution.
-; RPM = ((Rpm_PulseCount / 4) / 256) * 60000)
-;     = ((Rpm_PulseCount / 256) * 15000)
-;     = ((Rpm_PulseCount * 15000) / 256 )
+; For fan P/N:THA0412BN there are 4 pulses or 8 edges per revolution.
+; RPM = ((Isr_FanPulseCount / 4) / 256) * 60000)
+;     = ((Isr_FanPulseCount / 256) * 15000)
+;     = ((Isr_FanPulseCount * 15000) / 256 )
 ;
 ; When the fan spins at 20520 RPM it produces 342 revolutions in one second.
-; At 4 pulses per revolution this is at most 1368 pulses in one second.
+; At 4 edges per revolution this is at most 1368 counts in one second.
 ; This gives at most 351 counts in 256 milliseconds.
 ;
 ; The maximum product we expect is 15000 * 351, or 5265000. This fits in 24-bits.
 ; 
 ;
-#define RPM_SYSTEM_TICKS_BETWEEN_COUNTS (D'3')
 #define MILLISECONDS_IN_ONE_MINUTE (D'60000')
 #define SYSTEM_TICKS_IN_256MS (D'250')
 #define NUMBER_OF_SAMPLE_PERIODS (D'5')
-#define PULSE_PER_REVOLUTION (D'4')
+#define EDGES_PER_REVOLUTION (D'4')
+#define FAN_PULSE_FILTER_SYSTEM_TICKS (D'7')
 #define RPM_COUNT_PERIOD (SYSTEM_TICKS_IN_256MS*NUMBER_OF_SAMPLE_PERIODS)
-#define K1 (MILLISECONDS_IN_ONE_MINUTE/(NUMBER_OF_SAMPLE_PERIODS*PULSE_PER_REVOLUTION))
+#define K1 (MILLISECONDS_IN_ONE_MINUTE/(NUMBER_OF_SAMPLE_PERIODS*EDGES_PER_REVOLUTION))
 ;
 ;**********************************************************************
 ; All memory is declared here
@@ -179,9 +179,10 @@
         LCD_byte:1              ; used by LCD to save byte sent to or read from LCD
         LCD_BusyBit:1           ; used by LCD to store the mask of where the BUSY bit is located
         Pwm_DutyCycle:2         ; used by PWM to store the duty cycle
-        Rpm_PulseCount:2        ; used by RPM to count pulses during sample period
+        Isr_FanPulseCount:2     ; used by RPM ISR to count pulses during sample period
+        Rpm_FanPulseCount:2     ; used by RpmTest as snapshot of fan speed count
         Rpm_CountTimeout:2      ; used by RPM to set the pulse count sample period
-        Rpm_NoiseFlag:1         ; used by RPM to reject noise
+        Fan_PulseNoiseFilter:1  ; used by RPM ISR to reject fan speed pulse noise
         A_reg:2                 ; used by Math functions, 16-bit input  register A
         B_reg:0                 ; used by Math functions, 16-bit input  register B, register shares the low 16-bits of the output register
         D_reg:4                 ; used by Math functions, 32-bit output register D
@@ -233,26 +234,26 @@ ISR_INT:
     btfss   INTCON,INTF                     ; Skip if external interrupt is asserted
     goto    ISR_INT_Done
 ;
-#ifdef RPM_COUNT_BOTH_EDGES
-    banksel BANK1
+    bcf     INTCON,INTE                     ; Clear external interrupt enable
+    bsf     PORTE,0                         ; toggle RE0 (DEBUG)
+;
+    banksel BANK1                           ; Count both edges
     movlw   (1<<INTEDG)
     xorwf   OPTION_REG,F
     banksel BANK0
-#endif
-    bcf     INTCON,INTF                     ; Clear external interrupt request
 ;
 ; The external interrupt is used to count
 ; pulses from the fan speed output.
 ;
-    movf    Rpm_NoiseFlag,W
-    skpz                                    ; skip if enough time since last pulse counted
-    goto    ISR_INT_Done
-    movlw   RPM_SYSTEM_TICKS_BETWEEN_COUNTS ; Start timeout between pulse counts to help
-    addwf   Rpm_NoiseFlag,F                 ; reject noise on fan speed pulse output.
+    movf    Fan_PulseNoiseFilter,W
     movlw   1               
-    addwf   Rpm_PulseCount,F                ; Increment fan speed pulse count
+    skpz                                    ; skip if enough time since last pulse counted
+    movlw   0               
+    addwf   Isr_FanPulseCount,F                ; Increment fan speed pulse count
     skpnc
-    addwf   Rpm_PulseCount+1,F
+    addwf   Isr_FanPulseCount+1,F
+    movlw   FAN_PULSE_FILTER_SYSTEM_TICKS   ; Start timeout between pulse counts to help
+    addwf   Fan_PulseNoiseFilter,F          ; reject noise on fan speed pulse output.
 ISR_INT_Done:
 ;
 ; Handle TIMER0 interrupts
@@ -265,25 +266,30 @@ ISR_TMR0:
 ;
     bcf     INTCON,TMR0IF                   ; Clear TIMER0 interrupt request
 
-    movf    Rpm_NoiseFlag,W                 ; Check if enough ticks since
-    skpz                                    ; since last fans speed pulse
-    decf    Rpm_NoiseFlag,W                 ; has been counted.
-    movwf   Rpm_NoiseFlag
+    bsf     STATUS,C
+    movf    Fan_PulseNoiseFilter,W          ; Check if enough ticks since the last
+    skpz                                    ; fans speed pulse has been counted.
+    decfsz  Fan_PulseNoiseFilter,W          ; Decrement noise timeout counter when non-zero
+    bcf     STATUS,C
+    movwf   Fan_PulseNoiseFilter
+    btfss   STATUS,C
+    goto    ISR_TMR0_FilterDone
+    bcf     INTCON,INTF                     ; Clear the external interrupt assert when rejecting noise
+    bsf     INTCON,INTE                     ; Enable fan speed pulse counting while sample period is going
+    bcf     PORTE,0                         ; toggle RE0 (DEBUG)
+ISR_TMR0_FilterDone:
 ;
 ; Decrement the RPM period timeout
 ;
-    btfss   INTCON,INTE                     ; Skip if fan speed pulse count is running
-    goto    ISR_TMR0_RpmDone
-
     movf    Rpm_CountTimeout+0,W            ; Test the Rpm_CountTimeout for zero and
     iorwf   Rpm_CountTimeout+1,W
-    skpnz
-    bcf     INTCON,INTE                     ; Stop counting pulses at end of RPM count period
     skpz                                    ; decrement it by one when it is not zero.
     movlw   -1
     addwf   Rpm_CountTimeout+0,F
     skpc
     addwf   Rpm_CountTimeout+1,F
+    skpc
+    bcf     INTCON,INTE
 ISR_TMR0_RpmDone:
 ;
 ISR_TMR0_Done:
@@ -323,7 +329,7 @@ start:
     movlw   b'11111111'         ;
     movwf   TRISD
 
-    movlw   b'00001111'
+    movlw   b'00001100'         ; Make RE0 and output for debug
     movwf   TRISE
 
 #ifdef __16F877A
@@ -339,7 +345,6 @@ start:
     banksel BANK0
     clrf    TMR0
     goto    main
-;
 ;
 ;**********************************************************************
 ; Math support
@@ -440,8 +445,8 @@ Rpm_Init:
     bsf     OPTION_REG,INTEDG   ; Select LOW to HIGH edge for INT assert
     banksel BANK0
 
-    clrf    Rpm_PulseCount      ; Clear RPM counter
-    clrf    Rpm_PulseCount+1
+    clrf    Isr_FanPulseCount      ; Clear RPM counter
+    clrf    Isr_FanPulseCount+1
     return
 ;
 ;**********************************************************************
@@ -458,8 +463,8 @@ Rpm_Init:
 Rpm_Start:
     bcf     INTCON,INTE         ; disable external interrupts
 
-    clrf    Rpm_PulseCount      ; Clear RPM counter
-    clrf    Rpm_PulseCount+1
+    clrf    Isr_FanPulseCount      ; Clear RPM counter
+    clrf    Isr_FanPulseCount+1
 
     movlw   LOW(RPM_COUNT_PERIOD)
     movwf   Rpm_CountTimeout
@@ -483,9 +488,8 @@ Rpm_Start:
 ; Returns:  ZERO wheb the RPM capture period is complete
 ;
 Rpm_Status:
-    clrw
-    btfsc   INTCON,INTE
-    iorlw   1   
+    movf    Rpm_CountTimeout+0,W
+    iorwf   Rpm_CountTimeout+1,W
     return
 ;
 ;**********************************************************************
@@ -540,21 +544,23 @@ Pwm_Init:
 ;
 ; Returns:  nothing
 ;
+; Notes:    Uses the FSR as temporary storage for bit rotates
+;
 Pwm_SetDutyCycle:
+    rrf     Pwm_DutyCycle+1,W   ; Shift 10-bits of duty cycle right two bits
+    rrf     Pwm_DutyCycle+0,W   ; to get them in to the proper positions
+    movwf   FSR                 ; for the CCPRxL registers.
+    clrc                        ;
+    rrf     FSR,F               ; It is just weird that Microchip put these
+    btfsc   Pwm_DutyCycle+1,1   ; bits in such a clumsy order.
+    bsf     FSR,7
     swapf   Pwm_DutyCycle+0,W   ; Put 2-low duty cycle bits in proper position
-    rrf     Pwm_DutyCycle+1,F   ; Shift 10-bits of duty cycle right two bits
-    rrf     Pwm_DutyCycle+0,F   ; so it is the correct position for CCPR1L.
-    rrf     Pwm_DutyCycle+1,F   ; Remember to not use instrions that alter the
-    rrf     Pwm_DutyCycle+0,F   ; CARRY bit until we restore the Pwm_DutyCycle register.
-    xorwf   CCP1CON,W
+    xorwf   CCP1CON,W           ; for the CCPxCON register.
     andlw   B'00110000'
     xorwf   CCP1CON,F           ; Update low 2-bits of PWM duty cycle
-    movf    Pwm_DutyCycle,W
+    movf    FSR,W
     movwf   CCPR1L              ; Update high 8-bits of PWM duty cycle
-    rlf     Pwm_DutyCycle+0,F   ; Restore the Pwm_DutyCycle register.
-    rlf     Pwm_DutyCycle+1,F
-    rlf     Pwm_DutyCycle+0,F
-    rlf     Pwm_DutyCycle+1,F
+
     return
 ;
 ;**********************************************************************
@@ -571,11 +577,11 @@ Pwm_SetDutyCycle:
 ;
 Pwm_DutyCycleUp:
     movf    Pwm_DutyCycle+0,W
-    sublw   LOW (PWM_MAX_DUTY_CYCLE)
+    sublw   LOW (PWM_MAX_DUTY_CYCLE-1)
     movf    Pwm_DutyCycle+1,W
     skpc
     incfsz  Pwm_DutyCycle+1,W
-    sublw   HIGH(PWM_MAX_DUTY_CYCLE)
+    sublw   HIGH(PWM_MAX_DUTY_CYCLE-1)
     skpc
     return
     movlw   1
@@ -829,7 +835,6 @@ LCD_SetCGRamAddr:
 ;
 ;**********************************************************************
 ; Function:  LCD_SetDDRamAddr
-; Return Value:   void
 ; Description:
 ;   This routine sets the display data address
 ;   of the Hitachi HD44780 LCD controller.
@@ -1031,6 +1036,72 @@ LCD_PutHexNibble:
         return
 ;
 ;**********************************************************************
+; Function: LCD_PutDec
+; Description:
+;   Writes two ASCII character of the
+;   BCD value in thw WREG register.
+;
+; Inputs:   WREG = 8-bit BCD value to convert to ASCII and send to the LCD
+;           CARRY = 1 suppress zero of MSD
+;           DIGIT_CARRY = 1 suppress zero of LSD
+;
+; Outputs:  none
+;
+; Returns:  When either BCD digit is not zero then CARRY and DIGIT_CARRY are cleared
+;
+; Notes:
+;   When sending multiple pairs of BCD digits with zero suppression start with
+;   CARRY and DIGIT_CARRY set to one. For the last BCD digit pair always clear
+;   the DIGIT_CARRY to zero. This will display the last digit when when the 
+;   entire BCD number is all zeros.
+;
+;
+LCD_PutDecLSD:
+        movwf   LCD_pszRomStr       ; save digits to send
+        swapf   STATUS,W            ; save zero suppression flags
+        movwf   LCD_pszRomStr+1
+        goto    LCD_PutDecLSDonly
+        
+LCD_PutDec:
+        movwf   LCD_pszRomStr       ; save digits to send
+        swapf   STATUS,W            ; save zero suppression flags
+        movwf   LCD_pszRomStr+1
+        swapf   LCD_pszRomStr,W
+        andlw   0x0F
+        btfsc   LCD_pszRomStr+1,4
+        skpz                        ; Skip if digits is zero
+        goto    LCD_PutDecMSDnz
+        iorlw   ' '                 ; convert leading zero to space
+        goto    LCD_PutDecMSDzero
+LCD_PutDecMSDnz:
+        bcf     LCD_pszRomStr+1,4   ; digit not zero so stop suppressing zeros in MSD
+        bcf     LCD_pszRomStr+1,5   ; digit not zero so stop suppressing zeros in LSD
+        iorlw   '0'                 ; Convert BCD digit to ASCII number
+LCD_PutDecMSDzero:
+        call    LCD_WriteData
+
+LCD_PutDecLSDonly:        
+        movf    LCD_pszRomStr,W
+        andlw   0x0F
+        btfsc   LCD_pszRomStr+1,5
+        skpz                        ; Skip if digits is zero
+        goto    LCD_PutDecLSDnz
+        iorlw   ' '                 ; convert leading zero to space
+        goto    LCD_PutDecLSDzero
+LCD_PutDecLSDnz:
+        bcf     LCD_pszRomStr+1,4   ; digit not zero so stop suppressing zeros in MSD
+        bcf     LCD_pszRomStr+1,5   ; digit not zero so stop suppressing zeros in LSD
+        iorlw   '0'                 ; Convert BCD digit to ASCII number
+LCD_PutDecLSDzero:
+        call    LCD_WriteData
+
+        swapf   LCD_pszRomStr+1,W   ; Return state of zero suppression flags
+        movwf   STATUS
+        swapf   LCD_pszRomStr,F     ; Return 
+        swapf   LCD_pszRomStr,W
+        return
+;
+;**********************************************************************
 ; Function: LCD_Putrs
 ; Description:
 ;   This routine writes a string of bytes to the
@@ -1189,7 +1260,7 @@ Uart_Init:
     bsf     RCSTA,CREN
     bsf     RCSTA,SPEN
     bcf     PIR1,RCIF
-    bcf     PIR1,TXIE
+    bcf     PIR1,TXIF
 #ifdef UART_ISR_ENABLED
     banksel BANK1               ; enable UART interrupts
     bsf     PIE1,RCIE
@@ -1301,6 +1372,72 @@ Uart_PutHexNibble:
         addlw   '0'-d'6'
         call    Uart_Putc
         movf    Uart_pszRomStr,W
+        return
+;
+;**********************************************************************
+; Function: Uart_PutDec
+; Description:
+;   Writes two ASCII character of the
+;   BCD value in thw WREG register.
+;
+; Inputs:   WREG = 8-bit BCD value to convert to ASCII and send to the LCD
+;           CARRY = 1 suppress zero of MSD
+;           DIGIT_CARRY = 1 suppress zero of LSD
+;
+; Outputs:  none
+;
+; Returns:  When either BCD digit is not zero then CARRY and DIGIT_CARRY are cleared
+;
+; Notes:
+;   When sending multiple pairs of BCD digits with zero suppression start with
+;   CARRY and DIGIT_CARRY set to one. For the last BCD digit pair always clear
+;   the DIGIT_CARRY to zero. This will display the last digit when when the 
+;   entire BCD number is all zeros.
+;
+;
+Uart_PutDecLSD:
+        movwf   Uart_pszRomStr      ; save digits to send
+        swapf   STATUS,W            ; save zero suppression flags
+        movwf   Uart_pszRomStr+1
+        goto    Uart_PutDecLSDonly
+        
+Uart_PutDec:
+        movwf   Uart_pszRomStr      ; save digits to send
+        swapf   STATUS,W            ; save zero suppression flags
+        movwf   Uart_pszRomStr+1
+        swapf   Uart_pszRomStr,W
+        andlw   0x0F
+        btfsc   Uart_pszRomStr+1,4
+        skpz                        ; Skip if digit is zero
+        goto    Uart_PutDecMSDnz
+        iorlw   ' '                 ; convert leading zero to space
+        goto    Uart_PutDecMSDzero
+Uart_PutDecMSDnz:
+        bcf     Uart_pszRomStr+1,4  ; digit not zero so stop suppressing zeros in MSD
+        bcf     Uart_pszRomStr+1,5  ; digit not zero so stop suppressing zeros in LSD
+        iorlw   '0'                 ; Convert BCD digit to ASCII number
+Uart_PutDecMSDzero:
+        call    Uart_Putc
+
+Uart_PutDecLSDonly:
+        movf    Uart_pszRomStr,W
+        andlw   0x0F
+        btfsc   Uart_pszRomStr+1,5  ; Skip when leading zero suppression is off
+        skpz                        ; Skip if digit is zero
+        goto    Uart_PutDecLSDnz
+        movlw   ' '                 ; convert leading zero to space
+        goto    Uart_PutDecLSDzero
+Uart_PutDecLSDnz:
+        bcf     Uart_pszRomStr+1,4  ; digit not zero so stop suppressing zeros in MSD
+        bcf     Uart_pszRomStr+1,5  ; digit not zero so stop suppressing zeros in LSD
+        iorlw   '0'                 ; Convert BCD digit to ASCII number
+Uart_PutDecLSDzero:
+        call    Uart_Putc
+
+        swapf   Uart_pszRomStr+1,W   ; Return state of zero suppression flags
+        movwf   STATUS
+        swapf   Uart_pszRomStr,F     ; Return 
+        swapf   Uart_pszRomStr,W
         return
 ;
 ;**********************************************************************
@@ -1430,6 +1567,13 @@ RpmTest:
     call    Rpm_Status
     skpz                        ; Skip if pulse count period complete
     return
+    
+    bcf     PORTE,1 ; debug
+    movf    Isr_FanPulseCount+0,W   ; copy pulse count
+    movwf   Rpm_FanPulseCount
+    movf    Isr_FanPulseCount+1,W
+    movwf   Rpm_FanPulseCount+1
+    call    Rpm_Start           ; start next pulse count period
 
     movf    Pwm_DutyCycle+0,W   ; copy pulse count
     movwf   A_reg               ; to Bin2BCD binary register
@@ -1445,22 +1589,53 @@ RpmTest:
     call    Uart_Putc
     movlw   ':'
     call    Uart_Putc
+    bsf     STATUS,C
+    bsf     STATUS,DC
     movf    D_reg+1,W
-    call    Uart_PutHex
+    call    Uart_PutDec
+    bcf     STATUS,DC
     movf    D_reg+0,W
-    call    Uart_PutHex
+    call    Uart_PutDec
     movlw   ' '
     call    Uart_Putc
 
-    movf    Rpm_PulseCount+0,W  ; copy pulse count
-    movwf   B_reg               ; to multiply register
-    movf    Rpm_PulseCount+1,W
-    movwf   B_reg+1
-
-    movlw   LOW (K1)            ; load RPM converion factor
-    movwf   A_reg               ; in multiplier register
-    movlw   HIGH(K1)
+    movf    Rpm_FanPulseCount+0,W ; copy pulse count
+    movwf   A_reg               ; to multiply register
+    movf    Rpm_FanPulseCount+1,W
     movwf   A_reg+1
+
+    call    Bin2BCD             ; Convert to BCD
+
+    movlw   'C'
+    call    Uart_Putc
+    movlw   'N'
+    call    Uart_Putc
+    movlw   'T'
+    call    Uart_Putc
+    movlw   ':'
+    call    Uart_Putc
+
+    bsf     STATUS,C
+    bsf     STATUS,DC
+    movf    D_reg+2,W
+    call    Uart_PutDecLSD
+    movf    D_reg+1,W
+    call    Uart_PutDec
+    bcf     STATUS,DC
+    movf    D_reg+0,W
+    call    Uart_PutDec
+    movlw   ' '
+    call    Uart_Putc
+
+    movf    Rpm_FanPulseCount+0,W ; copy pulse count
+    movwf   A_reg               ; to multiply register
+    movf    Rpm_FanPulseCount+1,W
+    movwf   A_reg+1
+    
+    movlw   LOW (K1)            ; load RPM converion factor
+    movwf   B_reg               ; in multiplier register
+    movlw   HIGH(K1)
+    movwf   B_reg+1
 
     call    uMutiply_16x16      ; Do the multiply to get RPM * 256
 
@@ -1468,8 +1643,10 @@ RpmTest:
     movwf   A_reg+0
     movf    D_reg+2,W
     movwf   A_reg+1
+
     call    Bin2BCD             ; Convert to BCD
 
+; Display the result on UART
     movlw   'R'
     call    Uart_Putc
     movlw   'P'
@@ -1479,27 +1656,50 @@ RpmTest:
     movlw   ':'
     call    Uart_Putc
 
-    movf    D_reg+2,W           ; Display the result on UART
-    call    Uart_PutHex
+    bsf     STATUS,C
+    bsf     STATUS,DC
+    movf    D_reg+2,W
+    call    Uart_PutDecLSD
     movf    D_reg+1,W
-    call    Uart_PutHex
+    call    Uart_PutDec
+    bcf     STATUS,DC
     movf    D_reg+0,W
-    call    Uart_PutHex
+    call    Uart_PutDec
     movlw   CR
     call    Uart_Putc
     movlw   LF
     call    Uart_Putc
 
-    movlw   LINE_TWO+4          ; Display the result on LCD
+; Display the result on LCD
+    movlw   LINE_TWO+4          
     call    LCD_SetDDRamAddr
-    movf    D_reg+2,W           
-    call    LCD_PutHex
+    bsf     STATUS,C
+    bsf     STATUS,DC
+    movf    D_reg+2,W
+    call    LCD_PutDecLSD
     movf    D_reg+1,W
-    call    LCD_PutHex
+    call    LCD_PutDec
+    bcf     STATUS,DC
     movf    D_reg+0,W
-    call    LCD_PutHex
+    call    LCD_PutDec
 
-    call    Rpm_Start           ; start next pulse count period
+    movf    Rpm_FanPulseCount+0,W ; copy pulse count
+    movwf   A_reg               ; to multiply register
+    movf    Rpm_FanPulseCount+1,W
+    movwf   A_reg+1
+    call    Bin2BCD             ; Convert to BCD
+
+    movlw   LINE_TWO+12         
+    call    LCD_SetDDRamAddr
+    bsf     STATUS,C
+    bsf     STATUS,DC
+    movf    D_reg+1,W
+    call    LCD_PutDec
+    bcf     STATUS,DC
+    movf    D_reg+0,W
+    call    LCD_PutDec
+
+    bsf     PORTE,1 ;debug
 
     return
 ;
@@ -1508,7 +1708,7 @@ RpmTest:
 LCD_message1:
     dt  "Fan Speed - v1.0",0
 LCD_message2:
-    dt  "RPM:            ",0
+    dt  "RPM:      C:    ",0
 Uart_message1:
     dt  CR,LF
     dt  "UART PWM command ",CR,LF
