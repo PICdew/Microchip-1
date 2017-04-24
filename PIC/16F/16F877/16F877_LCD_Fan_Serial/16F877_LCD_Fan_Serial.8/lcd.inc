@@ -20,6 +20,7 @@
     ExtSymbol   LCD_Init
     ExtSymbol   LCD_PutHex
     ExtSymbol   LCD_PutDec
+    ExtSymbol   LCD_PutDecLSD
     ExtSymbol   LCD_putrs
     ExtSymbol   LCD_BusyBit
 

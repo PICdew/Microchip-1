@@ -32,104 +32,98 @@ fsr_temp    RES     1   ; variable used for context saving
 ISR_VECTOR code 0x004                       ; interrupt vector location
 
 INTERRUPT:
-    movwf   w_temp                          ; save off current W register contents
-    movf    STATUS,w                        ; move status register into W register
-    banksel status_temp
-    movwf   status_temp                     ; save off contents of STATUS register
-    movf    PCLATH,W                        
-    movwf   pclath_temp                     ; Save PCLATCH register
+    movwf   w_temp              ; save off current W register contents
+    movf    STATUS,w            ; move status register into W register
+    banksel BANK0
+    movwf   status_temp         ; save off contents of STATUS register
+    movf    PCLATH,W
+    movwf   pclath_temp         ; Save PCLATCH register
     movf    FSR,W
-    movwf   fsr_temp                        ; Save File Select Register
-    movlw   HIGH(INTERRUPT)                 ; Set program page to the curent page so 
-    movwf   PCLATH                          ; that GOTO and CALL branch to this page
+    movwf   fsr_temp            ; Save File Select Register
+    movlw   HIGH(INTERRUPT)     ; Set program page to the current page so
+    movwf   PCLATH              ; that GOTO and CALL branch to this page
 ;
 ; Handle INT interrupts
 ;
 ISR_INT:
-    btfss   INTCON,INTE                     ; Skip if external interrupt is emabled
+    btfss   INTCON,INTE                     ; Skip if external interrupt is enabled
     goto    ISR_INT_Done
-    btfss   INTCON,INTF
+    btfss   INTCON,INTF                     ; Skip if external interrupt is asserted
     goto    ISR_INT_Done
 ;
-#ifdef RPM_COUNT_BOTH_EDGES
-    banksel OPTION_REG
+    bcf     INTCON,INTE                     ; Clear external interrupt enable
+;
+    banksel BANK1                           ; Count both edges
     movlw   (1<<INTEDG)
     xorwf   OPTION_REG,F
     banksel BANK0
-#endif
-    bcf     INTCON,INTF                     ; Clear external interrupt request
 ;
 ; The external interrupt is used to count
 ; pulses from the fan speed output.
 ;
-    banksel Rpm_NoiseFlag
-    decfsz  Rpm_NoiseFlag,W
-    goto    ISR_INT_Done
-    bsf     Rpm_NoiseFlag,1
-    movlw   1
-    addwf   Rpm_PulseCount,F
+    banksel Fan_PulseNoiseFilter
+    movf    Fan_PulseNoiseFilter,W
+    movlw   1               
+    skpz                                    ; skip if enough time since last pulse counted
+    movlw   0               
+    addwf   Isr_FanPulseCount,F                ; Increment fan speed pulse count
     skpnc
-    addwf   Rpm_PulseCount+1,F
+    addwf   Isr_FanPulseCount+1,F
+    movlw   FAN_PULSE_FILTER_SYSTEM_TICKS   ; Start timeout between pulse counts to help
+    addwf   Fan_PulseNoiseFilter,F          ; reject noise on fan speed pulse output.
 ISR_INT_Done:
-;
 ;
 ; Handle TIMER0 interrupts
 ;
 ISR_TMR0:
-    btfss   INTCON,TMR0IE                   ; Skip if TIMER0 interrupt is emabled
+    btfss   INTCON,TMR0IE                   ; Skip if TIMER0 interrupt is enabled
     goto    ISR_TMR0_Done
-    btfss   INTCON,TMR0IF
+    btfss   INTCON,TMR0IF                   ; Skip if TIMER0 interrupt is asserted
     goto    ISR_TMR0_Done
 ;
     bcf     INTCON,TMR0IF                   ; Clear TIMER0 interrupt request
-    banksel Rpm_NoiseFlag
-    decfsz  Rpm_NoiseFlag,W                 ; Complete fan speed pulse noise filter
-    movwf   Rpm_NoiseFlag
-;
-; Advance the button debouce state every system tick
-;
+
     lcall   Button_Poll
     pagesel ISR_TMR0
+
+    banksel Fan_PulseNoiseFilter
+    bsf     STATUS,C
+    movf    Fan_PulseNoiseFilter,W          ; Check if enough ticks since the last
+    skpz                                    ; fans speed pulse has been counted.
+    decfsz  Fan_PulseNoiseFilter,W          ; Decrement noise timeout counter when non-zero
+    bcf     STATUS,C
+    movwf   Fan_PulseNoiseFilter
+    btfss   STATUS,C
+    goto    ISR_TMR0_FilterDone
+    bcf     INTCON,INTF                     ; Clear the external interrupt assert when rejecting noise
+    bsf     INTCON,INTE                     ; Enable fan speed pulse counting while sample period is going
+ISR_TMR0_FilterDone:
 ;
 ; Decrement the RPM period timeout
 ;
-    btfss   INTCON,INTE
-    goto    ISR_TMR0_RpmDone
-
     banksel Rpm_CountTimeout
     movf    Rpm_CountTimeout+0,W            ; Test the Rpm_CountTimeout for zero and
     iorwf   Rpm_CountTimeout+1,W
     skpz                                    ; decrement it by one when it is not zero.
-    movlw   0xFF
+    movlw   -1
     addwf   Rpm_CountTimeout+0,F
     skpc
     addwf   Rpm_CountTimeout+1,F
     skpc
-    bcf     INTCON,INTE                     ; Stop counting pulses at end of RPM count period
+    bcf     INTCON,INTE
 ISR_TMR0_RpmDone:
 ;
-; Decrement the system tick timeout
-;
-    banksel SystemTickTimeout
-    movf    SystemTickTimeout+1,W           ; Test the SystemTickTimeout for zero and
-    iorwf   SystemTickTimeout,W             ; decrement it by one when it is not zero.
-    skpz                                    ;
-    movlw   0xFF                            ; The SystemTickTimeout is intended to be polled during the process loop
-    addwf   SystemTickTimeout,F             ; process loop to determine when the interval has expired.
-    skpc                                    ; When the process loop writes to the SystemTickTimeout the TIMER0
-    addwf   SystemTickTimeout+1,F           ; interrupt must be disabled.
 ISR_TMR0_Done:
 ;
-
-    banksel status_temp
+    banksel BANK0
     movf    fsr_temp,W
     movwf   FSR
-    movf    pclath_temp,W                   
-    movwf   PCLATH                          
-    movf    status_temp,w                   ; retrieve copy of STATUS register
-    movwf   STATUS                          ; restore pre-isr STATUS register contents
-    swapf   w_temp,f                        
-    swapf   w_temp,w                        ; restore pre-isr W register contents
-    retfie                                  ; return from interrupt
+    movf    pclath_temp,W
+    movwf   PCLATH
+    movf    status_temp,w       ; retrieve copy of STATUS register
+    movwf   STATUS              ; restore pre-isr STATUS register contents
+    swapf   w_temp,f
+    swapf   w_temp,w            ; restore pre-isr W register contents
+    retfie                      ; return from interrupt
 
     end

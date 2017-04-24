@@ -175,13 +175,37 @@ LcdTestNextState:
 
     movlw   LINE_ONE+D'9'
     lcall   LCD_SetDDRamAddr
+
     banksel LcdTestCount
     movf    LcdTestCount,W
+    banksel A_reg
+    movwf   A_reg+0
+    clrf    A_reg+1
+    lcall   Bin2BCD
+    bsf     STATUS,C
+    bsf     STATUS,DC
+    movf    D_reg+1,W
+    lcall   LCD_PutDecLSD
+    bcf     STATUS,DC
+    movf    D_reg+0,W
     lcall   LCD_PutDec
+
     movlw   '-'
     lcall   LCD_WriteData
+
+    banksel LcdTestCount
     movf    LcdTestCount,W
     addlw   D'15'
+    banksel A_reg
+    movwf   A_reg+0
+    clrf    A_reg+1
+    lcall   Bin2BCD
+    bsf     STATUS,C
+    bsf     STATUS,DC
+    movf    D_reg+1,W
+    lcall   LCD_PutDecLSD
+    bcf     STATUS,DC
+    movf    D_reg+0,W
     lcall   LCD_PutDec
 
     movlw   LINE_TWO
@@ -202,11 +226,16 @@ LcdTestWriteLoop:
 ;
 ;
 ;
-#define K1 (D'15000')
 RpmTest:
     lcall   Rpm_Status
     skpz
     return
+    banksel Rpm_FanPulseCount
+    movf    Isr_FanPulseCount+0,W   ; copy pulse count
+    movwf   Rpm_FanPulseCount
+    movf    Isr_FanPulseCount+1,W
+    movwf   Rpm_FanPulseCount+1
+    lcall   Rpm_Start               ; start next pulse count period
 
     bankisel Pwm_DutyCycle  ; copy pulse count
     movlw   Pwm_DutyCycle   ; to Bin2BCD binary register
@@ -238,8 +267,8 @@ RpmTest:
     movlw   ' '
     call    Uart_Putc
 
-    bankisel Rpm_PulseCount ; copy pulse count
-    movlw   Rpm_PulseCount  ; to multiply register
+    bankisel Rpm_FanPulseCount ; copy pulse count
+    movlw   Rpm_FanPulseCount  ; to multiply register
     movwf   FSR
     movf    INDF,W
     banksel B_reg
@@ -286,8 +315,6 @@ RpmTest:
     call    Uart_Putc
     movlw   LF
     call    Uart_Putc
-
-    lcall   Rpm_Start       ; start next pulse count period
 
     return
 ;

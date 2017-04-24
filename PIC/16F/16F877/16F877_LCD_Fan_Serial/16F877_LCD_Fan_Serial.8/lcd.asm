@@ -73,15 +73,22 @@ DelayPORXLCD:
     call    DelayXLCD
     goto    DelayXLCD
 ;
-; Function Name:  LCD_Busy                                  
-; Return Value:   W = Not zero when status of LCD controller is busy 
-; Parameters:     void                                      
-; Description:    This routine reads the busy status of the 
-;                 Hitachi HD44780 LCD controller.
+;**********************************************************************
+; Function: LCD_Busy
+; Description:
+;   This routine reads the busy status of the
+;   Hitachi HD44780 LCD controller.
+;
+; Inputs:   none
+;
+; Outputs:  none
+;
+; Returns:  WREG = Not zero when status of LCD controller is busy
+;
 ; Notes:
 ;  The busy bit is not reported in the same nibble
 ;  on all HD44780 "compatible" controllers.
-;  If you have a Novatek 7605 type controller some 
+;  If you have a Novatek 7605 type controller some
 ;  versions report these nibbles in reverse order.
 ;
 ;  This code has been tested with a Novatek 7605
@@ -171,13 +178,19 @@ LCD_GetByte:
     iorwf   LCD_byte,F
     movf    LCD_byte,W
     return
-; 
-; Function Name:  LCD_SetCGRamAddr                               
-; Return Value:   void                                       
-; Parameters:     W = character generator ram address    
-; Description:    This routine sets the character generator  
-;                 address of the Hitachi HD44780 LCD         
-;                 controller.
+;
+;**********************************************************************
+; Function Name:  LCD_SetCGRamAddr
+; Description:
+;   This routine sets the character generator
+;   address of the Hitachi HD44780 LCD
+;   controller.
+;
+; Inputs:   W = character generator ram address
+;
+; Outputs:  none
+;
+; Returns:  nothing
 ;
 LCD_SetCGRamAddr:
     iorlw   0x40            ; Write cmd and address to port
@@ -189,11 +202,17 @@ LCD_SetCGRamAddr:
     goto    LCD_PutByte
 
 ;
-; Function Name:  LCD_SetDDRamAddr                              
-; Return Value:   void                                      
-; Parameters:     W = display data address              
-; Description:    This routine sets the display data address
-;                 of the Hitachi HD44780 LCD controller.
+;**********************************************************************
+; Function:  LCD_SetDDRamAddr
+; Description:
+;   This routine sets the display data address
+;   of the Hitachi HD44780 LCD controller.
+;
+; Inputs:   W = display data address
+;
+; Outputs:  none
+;
+; Returns:  nothing
 ;
 LCD_SetDDRamAddr:
     iorlw   0x80            ; Write cmd and address to port
@@ -204,12 +223,18 @@ LCD_SetDDRamAddr:
     bcf     RS_PIN
     goto    LCD_PutByte
 ;
-; Function Name:  LCD_WriteCmd                                
-; Return Value:   void                                        
-; Parameters:     W = command to send to LCD                 
-; Description:    This routine writes a command to the Hitachi
-;                 HD44780 LCD controller.
-; 
+;**********************************************************************
+; Function Name:  LCD_WriteCmd
+; Description:
+;   This routine writes a command to the Hitachi
+;   HD44780 LCD controller.
+;
+; Inputs:   W = command to send to LCD
+;
+; Outputs:  none
+;
+; Returns:  nothing
+;
 LCD_WriteCmd:
     movwf   LCD_byte        ; save byte going to LCD
 
@@ -218,14 +243,20 @@ LCD_WriteCmd:
     bcf     RS_PIN
     goto    LCD_PutByte
 ;
-; Function Name:  LCD_WriteData                               
-; Return Value:   void                                        
-; Parameters:     W = data byte to be written to LCD        
-; Description:    This routine writes a data byte to the      
-;                 Hitachi HD44780 LCD controller. The data  
-;                 is written to the character generator RAM or
-;                 the display data RAM depending on what the  
-;                 previous SetxxRamAddr routine was called.   
+;**********************************************************************
+; Function: LCD_WriteData
+; Description:
+;   This routine writes a data byte to the
+;   Hitachi HD44780 LCD controller. The data
+;   is written to the character generator RAM or
+;   the display data RAM depending on what the
+;   previous SetxxRamAddr routine was called.
+;
+; Inputs:   W = data to send to LCD
+;
+; Outputs:  none
+;
+; Returns:  nothing
 ;
 LCD_WriteData:
     movwf   LCD_byte        ; save byte going to LCD
@@ -237,14 +268,20 @@ LCD_WriteData:
     bcf     RS_PIN
     return
 ;
-; Function Name:  LCD_Init                                  
-; Return Value:   void                                      
-; Parameters:     W = sets the type of LCD (lines)     
-; Description:    This routine configures the LCD. Based on 
-;                 the Hitachi HD44780 LCD controller. The   
-;                 routine will configure the I/O pins of the
-;                 microcontroller, setup the LCD for 4-bit 
-;                 mode and clear the display.
+;**********************************************************************
+; Function: LCD_Init
+; Description:
+;   This routine configures the LCD. Based on
+;   the Hitachi HD44780 LCD controller. The
+;   routine will configure the I/O pins of the
+;   microcontroller, setup the LCD for 4-bit
+;   mode and clear the display.
+;
+; Inputs:   none
+;
+; Outputs:  none
+;
+; Returns:  nothing
 ;
 LCD_Init:
     clrf    LCD_BusyBit
@@ -254,13 +291,17 @@ LCD_Init:
     bcf     E_PIN           ; Make LCD data enable strobe an output
     bcf     RW_PIN          ; Make LCD Read/Write select an output
     bcf     RS_PIN          ; Make LCD Register select an output
+#ifdef LCD_POWER_EN
     bcf     LCD_POWER_EN    ; Make LCD power enable an output
+#endif
     banksel BANK0
     andwf   LCD_PORT,F      ; Drive all LCD pins low
     bcf     E_PIN
     bcf     RW_PIN
     bcf     RS_PIN
+#ifdef LCD_POWER_EN
     bsf     LCD_POWER_EN    ; Turn on LCD power
+#endif
 
     call    DelayPORXLCD    ; Wait for LCD to complete power on reset
 
@@ -294,18 +335,6 @@ LCD_Init:
     andlw   0x0F            ; Allow only 4-bit mode for
     iorlw   0x20            ; HD44780 LCD controller.
     call    LCD_WriteCmd
-    
-    movlw   (DOFF & CURSOR_OFF & BLINK_OFF)
-    call    LCD_WriteCmd
-
-    movlw   (DON & CURSOR_OFF & BLINK_OFF)
-    call    LCD_WriteCmd
-
-    movlw   (0x01)          ; Clear display
-    call    LCD_WriteCmd
-
-    movlw   (SHIFT_CUR_LEFT)
-    call    LCD_WriteCmd
 ;
 ; Find position of busy bit
 ; Required when using 4-bit mode.
@@ -322,6 +351,26 @@ LCD_Init:
     xorlw   0x11
     skpnz
     bsf     LCD_BusyBit,3
+;
+; Turn display off
+;
+    movlw   (DOFF & CURSOR_OFF & BLINK_OFF)
+    call    LCD_WriteCmd
+;
+; Turn display on
+;
+    movlw   (DON & CURSOR_OFF & BLINK_OFF)
+    call    LCD_WriteCmd
+;
+; Clear display
+;
+    movlw   (0x01)          ; Clear display
+    call    LCD_WriteCmd
+;
+; Set cursor shift direction
+;
+    movlw   (SHIFT_CUR_LEFT)
+    call    LCD_WriteCmd
 ;
 ; Initialize CGRAM
 ;
@@ -340,11 +389,17 @@ LCD_Init:
 
     return
 ;
-; Function Name:  LCD_PutHex
-; Return Value:   void
-; Parameters:     W = 8-bit value to send to LCD
-; Description:    Writes two ASCII character of the
-;                 hexadecimal value in thw W register.
+;**********************************************************************
+; Function: LCD_PutHex
+; Description:
+;   Writes two ASCII character of the
+;   hexadecimal value in thw WREG register.
+;
+; Inputs:   WREG = 8-bit value to convert to ASCII hex and send to the LCD
+;
+; Outputs:  none
+;
+; Returns:  nothing
 ;
 LCD_PutHex:
         movwf   LCD_pszRomStr
@@ -361,90 +416,90 @@ LCD_PutHexNibble:
         movf    LCD_pszRomStr,W
         return
 ;
-; Function Name:  LCD_PutDec
-; Return Value:   void
-; Parameters:     W = 8-bit value to send to LCD
-; Description:    Writes three ASCII character of the
-;                 decimal value in thw W register.
+;**********************************************************************
+; Function: LCD_PutDec
+; Description:
+;   Writes two ASCII character of the
+;   BCD value in thw WREG register.
 ;
+; Inputs:   WREG = 8-bit BCD value to convert to ASCII and send to the LCD
+;           CARRY = 1 suppress zero of MSD
+;           DIGIT_CARRY = 1 suppress zero of LSD
+;
+; Outputs:  none
+;
+; Returns:  When either BCD digit is not zero then CARRY and DIGIT_CARRY are cleared
+;
+; Notes:
+;   When sending multiple pairs of BCD digits with zero suppression start with
+;   CARRY and DIGIT_CARRY set to one. For the last BCD digit pair always clear
+;   the DIGIT_CARRY to zero. This will display the last digit when when the 
+;   entire BCD number is all zeros.
+;
+;
+LCD_PutDecLSD:
+        movwf   LCD_pszRomStr       ; save digits to send
+        swapf   STATUS,W            ; save zero suppression flags
+        movwf   LCD_pszRomStr+1
+        goto    LCD_PutDecLSDonly
+        
 LCD_PutDec:
-        clrf    LCD_pszRomStr+1
-
-        addlw   d'256'-d'200'
-        skpnc
-        bsf     LCD_pszRomStr+1,1
-        skpc
-        addlw   d'200'
-        
-        addlw   d'256'-d'100'
-        skpnc
-        bsf     LCD_pszRomStr+1,0
-        skpc
-        addlw   d'100'
-        
-        movwf   LCD_pszRomStr       ; save output value less than 100
-        
-        movlw   0x1F
-        andwf   LCD_pszRomStr+1,W
-        bsf     LCD_pszRomStr+1,5
-        skpz
-        bsf     LCD_pszRomStr+1,4
-        movf    LCD_pszRomStr+1,W
+        movwf   LCD_pszRomStr       ; save digits to send
+        swapf   STATUS,W            ; save zero suppression flags
+        movwf   LCD_pszRomStr+1
+        swapf   LCD_pszRomStr,W
+        andlw   0x0F
         btfsc   LCD_pszRomStr+1,4
-        call    LCD_WriteData       ; output 100's digit
-        movlw   0x10
-        andwf   LCD_pszRomStr+1,F
+        skpz                        ; Skip if digits is zero
+        goto    LCD_PutDecMSDnz
+        goto    LCD_PutDecMSD_Skip
+LCD_PutDecMSDnz:
+        bcf     LCD_pszRomStr+1,4   ; digit not zero so stop suppressing zeros in MSD
+        bcf     LCD_pszRomStr+1,5   ; digit not zero so stop suppressing zeros in LSD
+        iorlw   '0'                 ; Convert BCD digit to ASCII number
+LCD_PutDecMSDzero:
+        call    LCD_WriteData
+LCD_PutDecMSD_Skip:
 
+LCD_PutDecLSDonly:        
         movf    LCD_pszRomStr,W
-        addlw   d'256'-d'80'
-        skpnc
-        bsf     LCD_pszRomStr+1,3
-        skpc
-        addlw   d'80'
-        
-        addlw   d'256'-d'40'
-        skpnc
-        bsf     LCD_pszRomStr+1,2
-        skpc
-        addlw   d'40'
-        
-        addlw   d'256'-d'20'
-        skpnc
-        bsf     LCD_pszRomStr+1,1
-        skpc
-        addlw   d'20'
-        
-        addlw   d'256'-d'10'
-        skpnc
-        bsf     LCD_pszRomStr+1,0
-        skpc
-        addlw   d'10'
-        movwf   LCD_pszRomStr
+        andlw   0x0F
+        btfsc   LCD_pszRomStr+1,5
+        skpz                        ; Skip if digits is zero
+        goto    LCD_PutDecLSDnz
+        goto    LCD_PutDecLSD_Skip
+LCD_PutDecLSDnz:
+        bcf     LCD_pszRomStr+1,4   ; digit not zero so stop suppressing zeros in MSD
+        bcf     LCD_pszRomStr+1,5   ; digit not zero so stop suppressing zeros in LSD
+        iorlw   '0'                 ; Convert BCD digit to ASCII number
+LCD_PutDecLSDzero:
+        call    LCD_WriteData
+LCD_PutDecLSD_Skip:
 
-        movlw   0x1F
-        andwf   LCD_pszRomStr+1,W
-        bsf     LCD_pszRomStr+1,5
-        skpz
-        bsf     LCD_pszRomStr+1,4
-        movf    LCD_pszRomStr+1,W
-        btfsc   LCD_pszRomStr+1,4
-        call    LCD_WriteData       ; output 10's digit
-        movlw   '0'
-        addwf   LCD_pszRomStr,W
-        call    LCD_WriteData       ; output 1's digit
+        swapf   LCD_pszRomStr+1,W   ; Return state of zero suppression flags
+        movwf   STATUS
+        swapf   LCD_pszRomStr,F     ; Return 
+        swapf   LCD_pszRomStr,W
         return
 ;
-; Function Name:  LCD_putrs
-; Return Value:   void
-; Parameters:     LCD_pszRomStr: pointer to string
-; Description:    This routine writes a string of bytes to the
-;                 Hitachi HD44780 LCD controller. The data
-;                 is written to the character generator RAM or
-;                 the display data RAM depending on what the
-;                 previous SetxxRamAddr routine was called.
+;**********************************************************************
+; Function: LCD_Putrs
+; Description:
+;   This routine writes a string of bytes to the
+;   Hitachi HD44780 LCD controller. The data
+;   is written to the character generator RAM or
+;   the display data RAM depending on what the
+;   previous SetxxRamAddr routine was called.
+;
+; Inputs:   LCD_pszRomStr: pointer to string
+;
+; Outputs:  none
+;
+; Returns:  nothing
 ;
 LCD_putrs:
     call    TableLookUp
+    pagesel LCD_putrs
     iorlw   0
     skpnz
     return

@@ -11,10 +11,17 @@ Pwm_DutyCycle   res 2
 
 PWM_CODE   CODE
 ;
+;**********************************************************************
 ; Function: Pwm_Init
-; Input:    none
-; Output:   none
-; Returns:  none
+; Description:
+;   Setup TIMER2 for PWM period and initialize
+;   the CCP1 to produce a PWM output on pin RC2.
+;
+; Inputs:   none
+;
+; Outputs:  none
+;
+; Returns:  nothing
 ;
 Pwm_Init:
     banksel PIE1                ; Disable TIMER2 and CCP1 interruprs
@@ -43,48 +50,60 @@ Pwm_Init:
     bsf     Pwm_DutyCycle+1,1
     goto    Pwm_SetDutyCycle
 ;
+;**********************************************************************
 ; Function: Pwm_SetDutyCycle
-; Input:    Pwm_DutyCycle 
-; Output:   none
-; Returns:  none
+; Description:
+;   Move the Pwm_DutyCycle register to the PWM registers.
+;   This is an insane amount of code to do this but it
+;   is required because of the way the 10-bits of duty
+;   cycle registers are mapped into the hardware.
 ;
-; Move the Pwm_DutyCycle register to the PWM registers.
-; This is an insane amount of code to do this but it
-; is required because of the way the 10-bits of duty
-; cycle registers are mapped into the hardware.
+; Inputs:   Pwm_DutyCycle
+;
+; Outputs:  none
+;
+; Returns:  nothing
+;
+; Notes:    Uses the FSR as temporary storage for bit rotates
 ;
 Pwm_SetDutyCycle:
     banksel Pwm_DutyCycle
+    rrf     Pwm_DutyCycle+1,W   ; Shift 10-bits of duty cycle right two bits
+    rrf     Pwm_DutyCycle+0,W   ; to get them in to the proper positions
+    movwf   FSR                 ; for the CCPRxL registers.
+    clrc                        ;
+    rrf     FSR,F               ; It is just weird that Microchip put these
+    btfsc   Pwm_DutyCycle+1,1   ; bits in such a clumsy order.
+    bsf     FSR,7
     swapf   Pwm_DutyCycle+0,W   ; Put 2-low duty cycle bits in proper position
-    rrf     Pwm_DutyCycle+1,F   ; Shift 10-bits of duty cycle right two bits
-    rrf     Pwm_DutyCycle+0,F   ; so it is the correct position for CCPR1L.
-    rrf     Pwm_DutyCycle+1,F   ; Remember to not use instrions that alter the
-    rrf     Pwm_DutyCycle+0,F   ; CARRY bit until we restore the Pwm_DutyCycle register.
     banksel CCP1CON
-    xorwf   CCP1CON,W
+    xorwf   CCP1CON,W           ; for the CCPxCON register.
     andlw   B'00110000'
     xorwf   CCP1CON,F           ; Update low 2-bits of PWM duty cycle
-    banksel Pwm_DutyCycle
-    movf    Pwm_DutyCycle,W
-    banksel CCP1CON
+    movf    FSR,W
     movwf   CCPR1L              ; Update high 8-bits of PWM duty cycle
-    banksel Pwm_DutyCycle
-    rlf     Pwm_DutyCycle+0,F   ; Restore the Pwm_DutyCycle register.
-    rlf     Pwm_DutyCycle+1,F
-    rlf     Pwm_DutyCycle+0,F
-    rlf     Pwm_DutyCycle+1,F
     return
 ;
+;**********************************************************************
+; Function: Pwm_DutyCycleUp
+; Description:
+;   Increments the PWM duty cycle up to 100%
+;   and sets the hardware for the new duty cycle.
 ;
+; Inputs:   Pwm_DutyCycle
+;
+; Outputs:  Pwm_DutyCycle
+;
+; Returns:  nothing
 ;
 Pwm_DutyCycleUp:
     banksel Pwm_DutyCycle
     movf    Pwm_DutyCycle+0,W
-    sublw   LOW (PWM_MAX_DUTY_CYCLE)
+    sublw   LOW (PWM_MAX_DUTY_CYCLE-1)
     movf    Pwm_DutyCycle+1,W
     skpc
     incfsz  Pwm_DutyCycle+1,W
-    sublw   HIGH(PWM_MAX_DUTY_CYCLE)
+    sublw   HIGH(PWM_MAX_DUTY_CYCLE-1)
     skpc
     return
     movlw   1
@@ -93,13 +112,27 @@ Pwm_DutyCycleUp:
     addwf   Pwm_DutyCycle+1,F
     goto    Pwm_SetDutyCycle
 ;
+;**********************************************************************
+; Function: Pwm_DutyCycleDown
+; Description:
+;   Decrements the PWM duty cycle down to 0%
+;   and sets the hardware for the new duty cycle.
 ;
+; Inputs:   Pwm_DutyCycle
+;
+; Outputs:  Pwm_DutyCycle
+;
+; Returns:  nothing
 ;
 Pwm_DutyCycleDown:
     banksel Pwm_DutyCycle
     movf    Pwm_DutyCycle+0,W
-    iorwf   Pwm_DutyCycle+1,W
-    skpnz
+    sublw   LOW (PWM_MIN_DUTY_CYCLE)
+    movf    Pwm_DutyCycle+1,W
+    skpc
+    incfsz  Pwm_DutyCycle+1,W
+    sublw   HIGH(PWM_MIN_DUTY_CYCLE)
+    skpnc
     return
     movlw   0xFF
     addwf   Pwm_DutyCycle+0,F

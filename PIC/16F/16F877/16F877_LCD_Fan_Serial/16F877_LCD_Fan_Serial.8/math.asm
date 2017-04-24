@@ -15,6 +15,7 @@ mBits:      res     1
 
 MATH_CODE   CODE
 ;
+;**********************************************************************
 ; Function: uMutiply_16x16
 ; Input:    A_reg, 16-bit multiplicand
 ;           B_reg, 16-bit multiplier
@@ -51,6 +52,7 @@ uM16x16b:
     
     return
 ;
+;**********************************************************************
 ; Function: Bin2BCD
 ; Input:    A_reg, 16-bit binary
 ;
@@ -65,20 +67,20 @@ Bin2BCD:
     movwf   mBits
 
 ConvertBit:
-    movlw   h'33'           ; Correct BCD value so that
+    movlw   0x33            ; Correct BCD value so that
     addwf   D_reg+0,F       ; subsequent shift yields
-    btfsc   D_reg+0,.3      ; correct value.
-    andlw   h'f0'
-    btfsc   D_reg+0,.7
-    andlw   h'0f'
+    btfsc   D_reg+0,D'3'    ; correct value.
+    andlw   0xF0
+    btfsc   D_reg+0,D'7'
+    andlw   0x0F
     subwf   D_reg+0,F
 
-    movlw   h'33'
+    movlw   0x33
     addwf   D_reg+1,F
-    btfsc   D_reg+1,.3
-    andlw   h'f0'
-    btfsc   D_reg+1,.7
-    andlw   h'0f'
+    btfsc   D_reg+1,D'3'
+    andlw   0xF0
+    btfsc   D_reg+1,D'7'
+    andlw   0x0F
     subwf   D_reg+1,F
 
     rlf     A_reg+0,F       ; Shift out a binary bit

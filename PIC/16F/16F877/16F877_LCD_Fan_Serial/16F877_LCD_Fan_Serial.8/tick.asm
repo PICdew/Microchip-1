@@ -10,7 +10,18 @@ TICK_VAR    UDATA
 SystemTickTimeout   res     2
 
 TICK_CODE   CODE
-
+;
+;**********************************************************************
+; Function: Tick_Init
+; Description:
+;   Initialize TIMER0 as the system tick interrupt
+;
+; Inputs:   none
+;
+; Outputs:  none
+;
+; Returns:  nothing
+;
 Tick_Init:
     bcf     INTCON,TMR0IE       ; Disable TIMER0 interrupts
 

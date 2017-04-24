@@ -17,6 +17,8 @@
     ExtSymbol   Uart_Getc
     ExtSymbol   Uart_GetcStatus
     ExtSymbol   Uart_PutHex
+    ExtSymbol   Uart_PutDec
+    ExtSymbol   Uart_PutDecLSD
     ExtSymbol   Uart_Putrs
     ExtSymbol   Uart_pszRomStr
 
