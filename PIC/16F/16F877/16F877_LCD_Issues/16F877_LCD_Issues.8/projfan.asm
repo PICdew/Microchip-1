@@ -485,7 +485,7 @@ Rpm_Start:
 ;
 ; Outputs:  none
 ;
-; Returns:  ZERO wheb the RPM capture period is complete
+; Returns:  ZERO when the RPM capture period is complete
 ;
 Rpm_Status:
     movf    Rpm_CountTimeout+0,W
