@@ -5,10 +5,10 @@ Initialize the PIC to start with the default INTOSC at 4MHz, change to 8MHz then
 
 Output bits on PORTB are used to indicate status.
 
-RB0 - On wake up asserts early in initialization the deasserts when initialization completes.
+RB1 - On wake up asserts early in initialization the deasserts when initialization completes.
 
-RB0 - Indicates failure to enter deep sleep by toggling rapidly until normal Watch Dog Timeout causes a reset.
+RB1 - Indicates failure to enter deep sleep by toggling rapidly until normal Watch Dog Timeout causes a reset.
 
-RB1 - Toggles on wake from deep sleep caused by the Deep Sleep Watch Dog Timeout.
+RB2 - Toggles on wake from deep sleep caused by the Deep Sleep Watch Dog Timeout.
 
-RB2 - Toggles on wake from deep sleep caused by the INT0 HIGH to LOW edge.
+RB3 - Toggles on wake from deep sleep caused by the INT0 HIGH to LOW edge.
