@@ -56,9 +56,9 @@
 #endif
     
 #pragma config WDTEN = OFF, PLLDIV = 2, STVREN = ON, XINST = OFF, CPUDIV = OSC1
-#pragma config CP0 = OFF, OSC = INTOSC, T1DIG = OFF, LPT1OSC = OFF, WDTPS = 1
+#pragma config CP0 = OFF, OSC = INTOSC, T1DIG = OFF, LPT1OSC = OFF, WDTPS = 32768
 #pragma config FCMEN = OFF, IESO = OFF, DSWDTOSC = INTOSCREF, RTCOSC = T1OSCREF
-#pragma config DSBOREN = OFF, DSWDTEN = ON, DSWDTPS = 8192, IOL1WAY = OFF
+#pragma config DSBOREN = ON, DSWDTEN = ON, DSWDTPS = 8192, IOL1WAY = OFF
 #pragma config MSSP7B_EN = MSK7, WPFP = PAGE_31, WPEND = PAGE_WPFP
 #pragma config WPCFG = OFF, WPDIS = OFF
     
