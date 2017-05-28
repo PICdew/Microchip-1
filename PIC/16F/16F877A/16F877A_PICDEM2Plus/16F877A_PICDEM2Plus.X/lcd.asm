@@ -438,22 +438,41 @@ PutDecXLCD:
 ;                 previous SetxxRamAddr routine was called.
 ;
 putrsXLCD:
-    call    TableLookUp ; This affects the PCLATH regsiter
-    pagesel putrsXLCD   ; Point the PCLATH back to this code page.
-    iorlw   0
-    skpnz
-    return
-    call    WriteDataXLCD
-    incf    pszLCD_RomStr,F
-    skpnz
-    incf    pszLCD_RomStr+1,F
-    goto    putrsXLCD
-
-TableLookUp:
-    movfw   pszLCD_RomStr+1
-    movwf   PCLATH
-    movfw   pszLCD_RomStr
-    movwf   PCL
+        banksel EEADR
+        movf    pszLCD_RomStr,W
+        movwf   EEADR
+        movf    pszLCD_RomStr+1,W
+        movwf   EEADRH
+putrsXLCD_loop:
+        banksel EECON1
+        bsf     EECON1,EEPGD
+        bsf     EECON1,RD
+        nop
+        nop
+        banksel EEDATA
+        movf    EEDATA,W
+        movwf   pszLCD_RomStr
+        movf    EEDATH,W
+        movwf   pszLCD_RomStr+1
+        banksel BANK0
+        rlf     pszLCD_RomStr,W
+        rlf     pszLCD_RomStr+1,F
+        iorwf   pszLCD_RomStr+1,W
+        skpnz
+        return
+        bcf     pszLCD_RomStr+1,7
+        bcf     pszLCD_RomStr,7
+        movf    pszLCD_RomStr+1,W
+        skpz
+        call    WriteDataXLCD
+        movf    pszLCD_RomStr,W
+        skpz
+        call    WriteDataXLCD
+        banksel EEADR
+        incf    EEADR,F
+        skpnz
+        incf    EEADRH,F
+        goto    putrsXLCD_loop
 ;
 ; This table is used to write
 ; default characters to the
@@ -462,78 +481,78 @@ TableLookUp:
 ;
 LCD_CONST   code
 CGRAM_Table:
-    dt      B'10000000' ; CGRAM character 1
-    dt      B'10001110'
-    dt      B'10001010'
-    dt      B'10001010'
-    dt      B'10001110'
-    dt      B'10000000'
-    dt      B'10000000'
-    dt      B'10011111'
+    dw      B'01000000' ; CGRAM character 1
+    dw      B'01001110'
+    dw      B'01001010'
+    dw      B'01001010'
+    dw      B'01001110'
+    dw      B'01000000'
+    dw      B'01000000'
+    dw      B'01011111'
 
-    dt      B'10001110' ; CGRAM character 2
-    dt      B'10010001'
-    dt      B'10010000'
-    dt      B'10010000'
-    dt      B'10010001'
-    dt      B'10001110'
-    dt      B'10000000'
-    dt      B'10011111'
+    dw      B'01001110' ; CGRAM character 2
+    dw      B'01010001'
+    dw      B'01010000'
+    dw      B'01010000'
+    dw      B'01010001'
+    dw      B'01001110'
+    dw      B'01000000'
+    dw      B'01011111'
 
-    dt      B'10001110' ; CGRAM character 3
-    dt      B'10010001'
-    dt      B'10010000'
-    dt      B'10010011'
-    dt      B'10010001'
-    dt      B'10001110'
-    dt      B'10000000'
-    dt      B'10011111'
+    dw      B'01001110' ; CGRAM character 3
+    dw      B'01010001'
+    dw      B'01010000'
+    dw      B'01010011'
+    dw      B'01010001'
+    dw      B'01001110'
+    dw      B'01000000'
+    dw      B'01011111'
 
-    dt      B'10000000' ; CGRAM character 4
-    dt      B'10001110'
-    dt      B'10001010'
-    dt      B'10001010'
-    dt      B'10001110'
-    dt      B'10000000'
-    dt      B'10000000'
-    dt      B'10011111'
+    dw      B'01000000' ; CGRAM character 4
+    dw      B'01001110'
+    dw      B'01001010'
+    dw      B'01001010'
+    dw      B'01001110'
+    dw      B'01000000'
+    dw      B'01000000'
+    dw      B'01011111'
 
-    dt      B'10011110' ; CGRAM character 5
-    dt      B'10010001'
-    dt      B'10010001'
-    dt      B'10011110'
-    dt      B'10010010'
-    dt      B'10010001'
-    dt      B'10000000'
-    dt      B'10011111'
+    dw      B'01011110' ; CGRAM character 5
+    dw      B'01010001'
+    dw      B'01010001'
+    dw      B'01011110'
+    dw      B'01010010'
+    dw      B'01010001'
+    dw      B'01000000'
+    dw      B'01011111'
 
-    dt      B'10001110' ; CGRAM character 6
-    dt      B'10010001'
-    dt      B'10010001'
-    dt      B'10011111'
-    dt      B'10010001'
-    dt      B'10010001'
-    dt      B'10000000'
-    dt      B'10011111'
+    dw      B'01001110' ; CGRAM character 6
+    dw      B'01010001'
+    dw      B'01010001'
+    dw      B'01011111'
+    dw      B'01010001'
+    dw      B'01010001'
+    dw      B'01000000'
+    dw      B'01011111'
 
-    dt      B'10010001' ; CGRAM character 7
-    dt      B'10011011'
-    dt      B'10010101'
-    dt      B'10010101'
-    dt      B'10010001'
-    dt      B'10010001'
-    dt      B'10000000'
-    dt      B'10011111'
+    dw      B'01010001' ; CGRAM character 7
+    dw      B'01011011'
+    dw      B'01010101'
+    dw      B'01010101'
+    dw      B'01010001'
+    dw      B'01010001'
+    dw      B'01000000'
+    dw      B'01011111'
 
-    dt      B'10000000' ; CGRAM character 8
-    dt      B'10001110'
-    dt      B'10001010'
-    dt      B'10001010'
-    dt      B'10001110'
-    dt      B'10000000'
-    dt      B'10000000'
-    dt      B'10011111'
+    dw      B'01000000' ; CGRAM character 8
+    dw      B'01001110'
+    dw      B'01001010'
+    dw      B'01001010'
+    dw      B'01001110'
+    dw      B'01000000'
+    dw      B'01000000'
+    dw      B'01011111'
 
-    dt      B'00000000' ; End of table marker
+    dw      B'00000000' ; End of table marker
 
     end

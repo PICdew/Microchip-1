@@ -193,11 +193,11 @@ lcdTestWriteLoop:
 ;
 MAIN_CONST   code
 LCD_message_BlankLine:
-    dt  "                ",0
+    da  "                ",0
 LCD_message4:
-    dt  "LCD test Ver 1.2",0
+    da  "LCD test Ver 1.3",0
 LCD_message5:
-    dt  "Symbols:        ",0
+    da  "Symbols:        ",0
 LCD_message6:
-    dt  "BusyBitMask:0x  ",0
+    da  "BusyBitMask:0x  ",0
     END
