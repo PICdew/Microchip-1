@@ -68,10 +68,10 @@ ButtonInit:
     bsf     ButtonS2    ; Make GPIO for switch S2 an input
     bsf     ButtonS3    ; Make GPIO for switch S3 an input
     banksel ButtonStatus
-    clrf    ButtonStatus     
-    clrf    ButtonSample    
-    clrf    ButtonStable    
-    clrf    ButtonChange    
+    clrf    ButtonStatus
+    clrf    ButtonSample
+    clrf    ButtonStable
+    clrf    ButtonChange
     clrf    ButtonStableCount
     return
 

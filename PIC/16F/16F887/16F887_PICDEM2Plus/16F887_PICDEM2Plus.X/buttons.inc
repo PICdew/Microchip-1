@@ -20,7 +20,7 @@
 #undefine ExtSymbol
 
 ;
-; 
+;
 ;
 #define ButtonS2 PORTA,4
 #define ButtonS3 PORTA,5

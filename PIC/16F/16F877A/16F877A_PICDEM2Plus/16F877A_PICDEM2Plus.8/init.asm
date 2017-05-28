@@ -1,11 +1,11 @@
-; 
+;
 ; File: init.asm
 ; Target: PIC16F877A
 ; IDE: MPLAB v8.92
 ; Compiler: MPASMWIN v5.51
 ;
 ; -------------------------
-; Initialization 
+; Initialization
 ; -------------------------
 #define INIT_ASM
 #include "main.inc"
@@ -18,7 +18,7 @@
 ; This RAM is used by the Interrupt Servoce Routine
 ; to save the context of the interrupted code.
 INT_VAR     UDATA_SHR
-w_temp      RES     1       ; variable used for context saving 
+w_temp      RES     1       ; variable used for context saving
 status_temp RES     1       ; variable used for context saving
 pclath_temp RES     1       ; variable used for context saving
 
@@ -57,32 +57,32 @@ start:
     banksel BANK1
     clrf    PIE1
     clrf    PIE2
-    
-    movlw   b'11000001'         ; Pull-ups off, INT edge low to high, WDT prescale 1:1 
+
+    movlw   b'11000001'         ; Pull-ups off, INT edge low to high, WDT prescale 1:1
     movwf   OPTION_REG          ; TMR0 clock edge low to high, TMR0 clock = FCY, TMR0 prescale 1:4
                                 ; TIMER0 will assert the overflow flag every 256*4 (1024)
                                 ; instruction cycles, with a 4MHz oscilator this ia 1.024 milliseconds.
-            
-    movlw   b'11111111'         ; 
-    movwf   TRISA           
-            
-    movlw   b'11111111'         ; 
-    movwf   TRISB           
-            
-    movlw   b'11111111'         ; 
-    movwf   TRISC           
-    
-    movlw   b'11111111'         ; 
+
+    movlw   b'11111111'         ;
+    movwf   TRISA
+
+    movlw   b'11111111'         ;
+    movwf   TRISB
+
+    movlw   b'11111111'         ;
+    movwf   TRISC
+
+    movlw   b'11111111'         ;
     movwf   TRISD
 
     ; disable comparators
     movlw   b'00000111'
     movwf   CMCON
-    
+
     ; Set all ADC inputs for digital I/O
     movlw   b'00000110'
     movwf   ADCON1
-    
+
     banksel BANK0
     clrf    TMR0
     pagesel main

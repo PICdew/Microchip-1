@@ -20,7 +20,7 @@
 #undefine ExtSymbol
 
 ;
-; 
+;
 ;
 #define LED_PORT PORTB
 #define LED_D2_MASK 0x01
