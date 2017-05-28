@@ -14,7 +14,7 @@
 ; for a 20MHz oscillator.
 ;
 ;#define USE_FAST_CLOCK
-#ifdef USE_FAST_CLOCK  
+#ifdef USE_FAST_CLOCK
 #define DELAY_FOR_FAST_CLOCK  call DelayFor18TCY
 #else
 #define DELAY_FOR_FAST_CLOCK
@@ -69,15 +69,15 @@ DelayPORXLCD:
     call    DelayXLCD
     goto    DelayXLCD
 ;
-; Function Name:  BusyXLCD                                  
-; Return Value:   W = Not zero when status of LCD controller is busy 
-; Parameters:     void                                      
-; Description:    This routine reads the busy status of the 
+; Function Name:  BusyXLCD
+; Return Value:   W = Not zero when status of LCD controller is busy
+; Parameters:     void
+; Description:    This routine reads the busy status of the
 ;                 Hitachi HD44780 LCD controller.
 ; Notes:
 ;  The busy bit is not reported in the same nibble
 ;  on all HD44780 "compatible" controllers.
-;  If you have a Novatek 7605 type controller some 
+;  If you have a Novatek 7605 type controller some
 ;  versions report these nibbles in reverse order.
 ;
 ;  This code has been tested with a Novatek 7605
@@ -94,7 +94,7 @@ BusyXLCD:
     DELAY_FOR_FAST_CLOCK
     bsf     E_PIN
     DELAY_FOR_FAST_CLOCK
-    
+
     btfsc   LCD_BusyBit,7
     movf    LCD_PORT,W      ; The standard LCD returns the BUSY flag first
 
@@ -102,7 +102,7 @@ BusyXLCD:
     DELAY_FOR_FAST_CLOCK
     bsf     E_PIN
     DELAY_FOR_FAST_CLOCK
-    
+
     btfsc   LCD_BusyBit,3
     movf    LCD_PORT,W      ; A Non standard LCD returns the BUSY flag second
 
@@ -167,12 +167,12 @@ ByteGetLCD:
     iorwf   LCD_byte,F
     movf    LCD_byte,W
     return
-; 
-; Function Name:  SetCGRamAddr                               
-; Return Value:   void                                       
-; Parameters:     W = character generator ram address    
-; Description:    This routine sets the character generator  
-;                 address of the Hitachi HD44780 LCD         
+;
+; Function Name:  SetCGRamAddr
+; Return Value:   void
+; Parameters:     W = character generator ram address
+; Description:    This routine sets the character generator
+;                 address of the Hitachi HD44780 LCD
 ;                 controller.
 ;
 SetCGRamAddr:
@@ -185,9 +185,9 @@ SetCGRamAddr:
     goto    BytePutLCD
 
 ;
-; Function Name:  SetDDRamAddr                              
-; Return Value:   void                                      
-; Parameters:     W = display data address              
+; Function Name:  SetDDRamAddr
+; Return Value:   void
+; Parameters:     W = display data address
 ; Description:    This routine sets the display data address
 ;                 of the Hitachi HD44780 LCD controller.
 ;
@@ -200,12 +200,12 @@ SetDDRamAddr:
     bcf     RS_PIN
     goto    BytePutLCD
 ;
-; Function Name:  WriteCmdXLCD                                
-; Return Value:   void                                        
-; Parameters:     W = command to send to LCD                 
+; Function Name:  WriteCmdXLCD
+; Return Value:   void
+; Parameters:     W = command to send to LCD
 ; Description:    This routine writes a command to the Hitachi
 ;                 HD44780 LCD controller.
-; 
+;
 WriteCmdXLCD:
     movwf   LCD_byte        ; save byte going to LCD
 
@@ -214,14 +214,14 @@ WriteCmdXLCD:
     bcf     RS_PIN
     goto    BytePutLCD
 ;
-; Function Name:  WriteDataXLCD                               
-; Return Value:   void                                        
-; Parameters:     W = data byte to be written to LCD        
-; Description:    This routine writes a data byte to the      
-;                 Hitachi HD44780 LCD controller. The data  
+; Function Name:  WriteDataXLCD
+; Return Value:   void
+; Parameters:     W = data byte to be written to LCD
+; Description:    This routine writes a data byte to the
+;                 Hitachi HD44780 LCD controller. The data
 ;                 is written to the character generator RAM or
-;                 the display data RAM depending on what the  
-;                 previous SetxxRamAddr routine was called.   
+;                 the display data RAM depending on what the
+;                 previous SetxxRamAddr routine was called.
 ;
 WriteDataXLCD:
     movwf   LCD_byte        ; save byte going to LCD
@@ -233,13 +233,13 @@ WriteDataXLCD:
     bcf     RS_PIN
     return
 ;
-; Function Name:  OpenXLCD                                  
-; Return Value:   void                                      
+; Function Name:  OpenXLCD
+; Return Value:   void
 ; Parameters:     none
-; Description:    This routine configures the LCD. Based on 
-;                 the Hitachi HD44780 LCD controller. The   
+; Description:    This routine configures the LCD. Based on
+;                 the Hitachi HD44780 LCD controller. The
 ;                 routine will configure the I/O pins of the
-;                 microcontroller, setup the LCD for 4-bit 
+;                 microcontroller, setup the LCD for 4-bit
 ;                 mode and clear the display.
 ;
 OpenXLCD:
@@ -288,7 +288,7 @@ OpenXLCD:
 
     movlw   (FOUR_BIT&LINES_5X7) ; Setup for 2-line display
     call    WriteCmdXLCD
-    
+
     movlw   (DOFF & CURSOR_OFF & BLINK_OFF)
     call    WriteCmdXLCD
 
@@ -304,7 +304,7 @@ OpenXLCD:
 ; Find position of busy bit
 ; Required when using 4-bit mode.
 ;
-    movlw   LINE_ONE+1      
+    movlw   LINE_ONE+1
     call    SetDDRamAddr
 
     call    BusyXLCD
@@ -319,7 +319,7 @@ OpenXLCD:
 ;
 ; Initialize CGRAM
 ;
-    clrw    
+    clrw
     call    SetCGRamAddr
     movlw   LOW(CGRAM_Table)
     movwf   pszLCD_RomStr
@@ -350,7 +350,7 @@ PutHexNibbleXLCD:
         addlw   0x06
         btfsc   STATUS,DC
         addlw   'A'-'0'-d'10'
-        addlw   '0'-d'6'   
+        addlw   '0'-d'6'
         call    WriteDataXLCD
         movf    pszLCD_RomStr,W
         return
@@ -369,15 +369,15 @@ PutDecXLCD:
         bsf     pszLCD_RomStr+1,1
         skpc
         addlw   d'200'
-        
+
         addlw   d'256'-d'100'
         skpnc
         bsf     pszLCD_RomStr+1,0
         skpc
         addlw   d'100'
-        
+
         movwf   pszLCD_RomStr       ; save output value less than 100
-        
+
         movlw   0x1F
         andwf   pszLCD_RomStr+1,W
         bsf     pszLCD_RomStr+1,5
@@ -395,19 +395,19 @@ PutDecXLCD:
         bsf     pszLCD_RomStr+1,3
         skpc
         addlw   d'80'
-        
+
         addlw   d'256'-d'40'
         skpnc
         bsf     pszLCD_RomStr+1,2
         skpc
         addlw   d'40'
-        
+
         addlw   d'256'-d'20'
         skpnc
         bsf     pszLCD_RomStr+1,1
         skpc
         addlw   d'20'
-        
+
         addlw   d'256'-d'10'
         skpnc
         bsf     pszLCD_RomStr+1,0
@@ -448,7 +448,7 @@ putrsXLCD:
     skpnz
     incf    pszLCD_RomStr+1,F
     goto    putrsXLCD               ; Loop until the end of string found
-    
+
 TableLookUp:
     movfw   pszLCD_RomStr+1
     movwf   PCLATH
@@ -456,7 +456,7 @@ TableLookUp:
     movwf   PCL
 ;
 ; This table is used to write
-; default characters to the 
+; default characters to the
 ; Character Generator RAM of
 ; the LCD module.
 ;

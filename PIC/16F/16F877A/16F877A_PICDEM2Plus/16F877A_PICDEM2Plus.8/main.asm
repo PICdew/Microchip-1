@@ -1,4 +1,4 @@
-; 
+;
 ; File: main.asm
 ; Target: PIC16F877A
 ; IDE: MPLAB v8.92
@@ -40,13 +40,17 @@
 ;
 ;   PICDEM 2 Plus:
 ;   RD0 <> LCD_D4    Special note that the LCD module on my PICDEM2 PLUS
-;   RD1 <> LCD_D5    is a NOVATEK 7605. In 4-bit mode the NOVATEK 7605 is 
-;   RD2 <> LCD_D6    not 100% compatible with the Hitachi HD44780. The 
-;   RD3 <> LCD_D7    issue is that in 4-bit mode a status read returns the 
+;   RD1 <> LCD_D5    is a NOVATEK 7605. In 4-bit mode the NOVATEK 7605 is
+;   RD2 <> LCD_D6    not 100% compatible with the Hitachi HD44780. The
+;   RD3 <> LCD_D7    issue is that in 4-bit mode a status read returns the
 ;   RD4 -> LCD_RS    4-bits in an order that is different from the HD44780.
-;   RD5 -> LCD_R/W   
-;   RD6 -> LCD_E   
-;   RD7 -> LCD_ON  
+;   RD5 -> LCD_R/W
+;   RD6 -> LCD_E
+;   RD7 -> LCD_ON
+;
+; WARNING:
+;   This code runs on a modified PICDEM 2 Plus demo board.
+;   The connection for push button S3 has been from RB0 to RA5.
 ;
 ;------------------------------------------------------------------------
 ;
@@ -57,15 +61,14 @@ lcdTestCount        res 1
 
 
 MAIN_CODE code
-; 
+;
 ; This is the LCD test application.
 ;
-; First open the LCD with a 4-bit 
+; First open the LCD with a 4-bit
 ; interface 5x7 character size
 ; and more than one line.
 ;
 main:
-    movlw   (FOUR_BIT&LINES_5X7)
     lcall   OpenXLCD
     lcall   ButtonInit
     lcall   LedInit
@@ -77,7 +80,7 @@ main:
 ;
 ; Start by sending two lines to the LCD:
 ;   Line1: LCD test Ver 1.0
-;   Line2:                 
+;   Line2:
 ;
 ; Then wait for a key event then display
 ; the LCD character set 16 characters at
