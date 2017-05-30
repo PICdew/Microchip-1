@@ -440,55 +440,54 @@ PutDecXLCD:
 ;
 putrsXLCD:
         banksel EEADR
-        movwf   EEADR
+        movwf   EEADR           ; Store offset to string pointer 
         movlw   LOW(TableOfStringPointers)
-        addwf   EEADR,F
+        addwf   EEADR,F         ; Add string table bas address to ofset
         movlw   HIGH(TableOfStringPointers)
-        btfsc   STATUS,C
+        btfsc   STATUS,C        ; Check for carry to high 8-bits
         addlw   1
         movwf   EEADRH
         banksel EECON1
-        bsf     EECON1,EEPGD
+        bsf     EECON1,EEPGD    ; Read 14-bit pointer to string in CODE space
         bsf     EECON1,RD
         nop
         nop
         banksel EEDATA
-        movf    EEDATA,W
+        movf    EEDATA,W        ; Move low byte of pointer to EEROM address register
         movwf   EEADR
-        movf    EEDATH,W
+        movf    EEDATH,W        ; Move high byte of pointer to EEROM address register
         movwf   EEADRH
 
 putrsXLCD_loop:
         banksel EECON1
-        bsf     EECON1,EEPGD
+        bsf     EECON1,EEPGD    ; Read 14-bit CODE space word of ASCII 128 string
         bsf     EECON1,RD
         nop
         nop
         banksel EEDATA
         movf    EEDATA,W
-        movwf   pszLCD_RomStr
+        movwf   pszLCD_RomStr   ; Store low 8-bits of word
         movf    EEDATH,W
-        movwf   pszLCD_RomStr+1
-        banksel BANK0
-        rlf     pszLCD_RomStr,W
-        iorwf   pszLCD_RomStr+1,W
-        skpnz
-        return
-        movf    pszLCD_RomStr+1,W
-        skpz
-        bcf     pszLCD_RomStr,7
-        rlf     pszLCD_RomStr+1,F
-        bcf     pszLCD_RomStr+1,7
-        movf    pszLCD_RomStr+1,W
-        skpz
-        call    WriteDataXLCD
-        movf    pszLCD_RomStr,W
-        skpz
-        call    WriteDataXLCD
-        banksel EEADR
-        incf    EEADR,F
+        movwf   pszLCD_RomStr+1 ; Store high 6-bits of word
+        incf    EEADR,F         ; Increment EEROM pointer
         skpnz
         incf    EEADRH,F
+        banksel BANK0
+        rlf     pszLCD_RomStr,W ; Set CARRY to MSB of low 8-bits
+        iorwf   pszLCD_RomStr+1,W
+        skpnz                   ; Skip if the 14-bit word is non-zero
+        return
+        movf    pszLCD_RomStr+1,W
+        skpz                    ; Skip if high 6-bits are zero
+        bcf     pszLCD_RomStr,7
+        rlf     pszLCD_RomStr+1,F ; unpack first ASCII 128 character
+        bcf     pszLCD_RomStr+1,7
+        movf    pszLCD_RomStr+1,W
+        skpz                    ; Skip if character is zero
+        call    WriteDataXLCD   ; Send all non-zero characters to the display
+        movf    pszLCD_RomStr,W
+        skpz                    ; Skip if character is zero
+        call    WriteDataXLCD   ; Send all non-zero characters to the display
         goto    putrsXLCD_loop
 
 ;
