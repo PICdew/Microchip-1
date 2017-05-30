@@ -29,5 +29,7 @@
 #define BUTTON_S3_CHANGE_MASK   0x20
 #define BUTTON_S2_STATE_MASK    0x01
 #define BUTTON_S3_STATE_MASK    0x02
+#define BUTTON_S2_STATE_BIT     0
+#define BUTTON_S3_STATE_BIT     1
 
 #endif

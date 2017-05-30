@@ -58,6 +58,7 @@
 ;
 MAIN_DATA udata
 lcdTestCount        res 1
+ButtonStatus        res 1
 
 
 MAIN_CODE code
@@ -90,10 +91,7 @@ lcdTest:
     movlw   LINE_ONE
     lcall   SetDDRamAddr
 
-    movlw   LOW(LCD_message4)
-    movwf   pszLCD_RomStr
-    movlw   HIGH(LCD_message4)
-    movwf   pszLCD_RomStr+1
+    movlw   MESSAGE4
     lcall   putrsXLCD
 ;
 ; Blank second line of LCD
@@ -102,10 +100,7 @@ lcdTestRestart:
     movlw   LINE_TWO
     lcall   SetDDRamAddr
 
-    movlw   LOW(LCD_message6)
-    movwf   pszLCD_RomStr
-    movlw   HIGH(LCD_message6)
-    movwf   pszLCD_RomStr+1
+    movlw   MESSAGE6
     lcall   putrsXLCD
 
     movlw   LINE_TWO+D'14'
@@ -118,26 +113,29 @@ lcdTestRestart:
 ;
 ; Wait for key event.
 ;
-TestLoop:
-    lcall   ButtonGetStatus
     pagesel TestLoop
-    skpnz
-    goto    TestContinue
-    xorlw   BUTTON_S2_CHANGE_MASK | BUTTON_S2_STATE_MASK
-    skpnz
-    goto    ledTestNextState
-    xorlw   BUTTON_S2_CHANGE_MASK | BUTTON_S2_STATE_MASK
-    xorlw   BUTTON_S3_CHANGE_MASK | BUTTON_S3_STATE_MASK
-    skpnz
-    goto    lcdTestNextState
+TestLoop:
 ;
 ; Wait for millisecond tick
 ;
-TestContinue:
     btfss   INTCON,T0IF
     goto    TestLoop
     bcf     INTCON,T0IF
     lcall   ButtonPoll
+    lcall   ButtonGetStatus
+    pagesel TestLoop
+    skpnz
+    goto    TestLoop
+    banksel ButtonStatus
+    movwf   ButtonStatus
+    swapf   ButtonStatus,F
+    andwf   ButtonStatus,F
+    pagesel ledTestNextState
+    btfsc   ButtonStatus,BUTTON_S3_STATE_BIT
+    call    ledTestNextState
+    pagesel lcdTestNextState
+    btfsc   ButtonStatus,BUTTON_S2_STATE_BIT
+    call    lcdTestNextState
     lgoto   TestLoop
 ;
 ; Show binary count in the LEDs of the PICDEM2 Plus
@@ -145,9 +143,7 @@ TestContinue:
 ledTestNextState:
     lcall   LedGet
     addlw   1
-    lcall   LedSet
-    pagesel TestContinue
-    goto    TestContinue
+    lgoto   LedSet
 ;
 ; Display 16 character on LCD line 2.
 ;
@@ -155,10 +151,7 @@ lcdTestNextState:
     movlw   LINE_ONE
     lcall   SetDDRamAddr
 
-    movlw   LOW(LCD_message5)
-    movwf   pszLCD_RomStr
-    movlw   HIGH(LCD_message5)
-    movwf   pszLCD_RomStr+1
+    movlw   MESSAGE5
     lcall   putrsXLCD
 
     movlw   LINE_ONE+D'9'
@@ -178,21 +171,21 @@ lcdTestWriteLoop:
     banksel lcdTestCount
     movf    lcdTestCount,W
     lcall   WriteDataXLCD
-    pagesel TestLoop
 
     banksel lcdTestCount
     incf    lcdTestCount,F
     movf    lcdTestCount,W
     andlw   0x0F
+    pagesel lcdTestWriteLoop
     skpz
     goto    lcdTestWriteLoop
-    goto    TestContinue
+    return
 
 ;
 ; LCD messages
 ;
-MAIN_CONST   code
-LCD_message_BlankLine:
+STRING_CONST   code
+LCD_BlankLine:
     da  "                ",0
 LCD_message4:
     da  "LCD test Ver 1.3",0
@@ -200,4 +193,10 @@ LCD_message5:
     da  "Symbols:        ",0
 LCD_message6:
     da  "BusyBitMask:0x  ",0
+;
+TableOfStringPointers:
+    dw  LCD_BlankLine
+    dw  LCD_message4
+    dw  LCD_message5
+    dw  LCD_message6
     END

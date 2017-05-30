@@ -321,11 +321,12 @@ OpenXLCD:
 ;
     clrw
     call    SetCGRamAddr
+    banksel EEADR
     movlw   LOW(CGRAM_Table)
-    movwf   pszLCD_RomStr
+    movwf   EEADR
     movlw   HIGH(CGRAM_Table)
-    movwf   pszLCD_RomStr+1
-    call    putrsXLCD
+    movwf   EEADRH
+    call    putrsXLCD_loop
 ;
 ; Put cursor on line one, left most position
 ;
@@ -430,7 +431,7 @@ PutDecXLCD:
 ;
 ; Function Name:  putrsXLCD
 ; Return Value:   void
-; Parameters:     pszLCD_RomStr: pointer to string
+; Parameters:     WREG - string selector, range 0 to 255
 ; Description:    This routine writes a string of bytes to the
 ;                 Hitachi HD44780 LCD controller. The data
 ;                 is written to the character generator RAM or
@@ -439,10 +440,24 @@ PutDecXLCD:
 ;
 putrsXLCD:
         banksel EEADR
-        movf    pszLCD_RomStr,W
         movwf   EEADR
-        movf    pszLCD_RomStr+1,W
+        movlw   LOW(TableOfStringPointers)
+        addwf   EEADR,F
+        movlw   HIGH(TableOfStringPointers)
+        btfsc   STATUS,C
+        addlw   1
         movwf   EEADRH
+        banksel EECON1
+        bsf     EECON1,EEPGD
+        bsf     EECON1,RD
+        nop
+        nop
+        banksel EEDATA
+        movf    EEDATA,W
+        movwf   EEADR
+        movf    EEDATH,W
+        movwf   EEADRH
+
 putrsXLCD_loop:
         banksel EECON1
         bsf     EECON1,EEPGD
@@ -456,12 +471,14 @@ putrsXLCD_loop:
         movwf   pszLCD_RomStr+1
         banksel BANK0
         rlf     pszLCD_RomStr,W
-        rlf     pszLCD_RomStr+1,F
         iorwf   pszLCD_RomStr+1,W
         skpnz
         return
-        bcf     pszLCD_RomStr+1,7
+        movf    pszLCD_RomStr+1,W
+        skpz
         bcf     pszLCD_RomStr,7
+        rlf     pszLCD_RomStr+1,F
+        bcf     pszLCD_RomStr+1,7
         movf    pszLCD_RomStr+1,W
         skpz
         call    WriteDataXLCD
@@ -473,6 +490,7 @@ putrsXLCD_loop:
         skpnz
         incf    EEADRH,F
         goto    putrsXLCD_loop
+
 ;
 ; This table is used to write
 ; default characters to the
@@ -481,78 +499,46 @@ putrsXLCD_loop:
 ;
 LCD_CONST   code
 CGRAM_Table:
-    dw      B'01000000' ; CGRAM character 1
-    dw      B'01001110'
-    dw      B'01001010'
-    dw      B'01001010'
-    dw      B'01001110'
-    dw      B'01000000'
-    dw      B'01000000'
-    dw      B'01011111'
+    dw      B'10000001001000' ; CGRAM character 1
+    dw      B'10001001001110'
+    dw      B'10001001001000'
+    dw      B'10000001011111'
 
-    dw      B'01001110' ; CGRAM character 2
-    dw      B'01010001'
-    dw      B'01010000'
-    dw      B'01010000'
-    dw      B'01010001'
-    dw      B'01001110'
-    dw      B'01000000'
-    dw      B'01011111'
+    dw      B'10011101010001' ; CGRAM character 2
+    dw      B'10100001010000'
+    dw      B'10100011001110'
+    dw      B'10000001011111'
 
-    dw      B'01001110' ; CGRAM character 3
-    dw      B'01010001'
-    dw      B'01010000'
-    dw      B'01010011'
-    dw      B'01010001'
-    dw      B'01001110'
-    dw      B'01000000'
-    dw      B'01011111'
+    dw      B'10011101010001' ; CGRAM character 3
+    dw      B'10100001010011'
+    dw      B'10100011001110'
+    dw      B'10000001011111'
 
-    dw      B'01000000' ; CGRAM character 4
-    dw      B'01001110'
-    dw      B'01001010'
-    dw      B'01001010'
-    dw      B'01001110'
-    dw      B'01000000'
-    dw      B'01000000'
-    dw      B'01011111'
+    dw      B'10000001001110' ; CGRAM character 4
+    dw      B'10010101001010'
+    dw      B'10011101000000'
+    dw      B'10000001011111'
 
-    dw      B'01011110' ; CGRAM character 5
-    dw      B'01010001'
-    dw      B'01010001'
-    dw      B'01011110'
-    dw      B'01010010'
-    dw      B'01010001'
-    dw      B'01000000'
-    dw      B'01011111'
+    dw      B'10111101010001' ; CGRAM character 5
+    dw      B'10100011011110'
+    dw      B'10100101010001'
+    dw      B'10000001011111'
 
-    dw      B'01001110' ; CGRAM character 6
-    dw      B'01010001'
-    dw      B'01010001'
-    dw      B'01011111'
-    dw      B'01010001'
-    dw      B'01010001'
-    dw      B'01000000'
-    dw      B'01011111'
+    dw      B'10011101010001' ; CGRAM character 6
+    dw      B'10100011011111'
+    dw      B'10100011010001'
+    dw      B'10000001011111'
 
-    dw      B'01010001' ; CGRAM character 7
-    dw      B'01011011'
-    dw      B'01010101'
-    dw      B'01010101'
-    dw      B'01010001'
-    dw      B'01010001'
-    dw      B'01000000'
-    dw      B'01011111'
+    dw      B'10100011011011' ; CGRAM character 7
+    dw      B'10101011010101'
+    dw      B'10100011010001'
+    dw      B'10000001011111'
 
-    dw      B'01000000' ; CGRAM character 8
-    dw      B'01001110'
-    dw      B'01001010'
-    dw      B'01001010'
-    dw      B'01001110'
-    dw      B'01000000'
-    dw      B'01000000'
-    dw      B'01011111'
+    dw      B'10000001000010' ; CGRAM character 8
+    dw      B'10001001001110'
+    dw      B'10001001000010'
+    dw      B'10000001011111'
 
-    dw      B'00000000' ; End of table marker
+    dw      B'00000000000000' ; End of table marker
 
     end

@@ -14,9 +14,17 @@
 #define ExtSymbol   extern
 #endif
 ;
+; Define string selectors
+;
+#define BLANKLINE 0
+#define MESSAGE4 1
+#define MESSAGE5 2
+#define MESSAGE6 3
+;
 ; Declare the public symbols
 ;
     ExtSymbol   main
+    ExtSymbol   TableOfStringPointers
 ;
 ; end of public symbols
 #undefine ExtSymbol
