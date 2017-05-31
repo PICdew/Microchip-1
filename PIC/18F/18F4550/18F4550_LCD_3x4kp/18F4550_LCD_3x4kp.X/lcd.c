@@ -116,41 +116,6 @@ static void LCD_Delay(void)
     __delay_ms(5);
 }
 
-static void LCD_Busy(void)
-{
-    if (LCD_BusyBit)
-    {
-        unsigned char LCD_Data;
-    
-        LCD_PORT_DIR |= LCD_DATA_BITS; /* make LCD data bits inputs */
-        LCD_Data = 0;
-
-        RS_PIN = 0;
-        RW_PIN = 1;
-        do
-        {
-            E_PIN = 1;
-            __delay_us(4);
-            LCD_Data = LCD_PORT_IN & LCD_DATA_BITS;
-            E_PIN = 0;
-            __delay_us(4);
-            
-            LCD_Data = ((LCD_Data >> 4) | (LCD_Data << 4));
-            
-            E_PIN = 1;
-            __delay_us(4);
-            LCD_Data |= LCD_PORT_IN & LCD_DATA_BITS;
-            E_PIN = 0;
-            __delay_us(4);
-        
-        } while (LCD_Data & LCD_BusyBit);
-    }
-    else
-    {
-        LCD_DelayPOR(); /* use 15ms delay when busy bit is unknown */
-    }
-}
-
 static unsigned char LCD_GetByte(void)
 {
     unsigned char LCD_Data;
@@ -172,13 +137,16 @@ static unsigned char LCD_GetByte(void)
     E_PIN = 0;
     __delay_us(4);
 
+#ifdef LCD_DATA_ON_HIGH_4_BITS
+    LCD_Data = ((LCD_Data >> 4) | (LCD_Data << 4));
+#endif
     return LCD_Data;
 }
 
-static void LCD_PutByte(unsigned char data)
+static void LCD_PutByte(unsigned char LCD_Data)
 {
 #ifdef LCD_DATA_ON_HIGH_4_BITS
-    data = ((data >> 4) | (data << 4));
+    LCD_Data = ((LCD_Data >> 4) | (LCD_Data << 4));
 #endif
 
     LCD_PORT_DIR &= ~LCD_DATA_BITS; /* make LCD data bits outputs */
@@ -186,14 +154,36 @@ static void LCD_PutByte(unsigned char data)
     
     /* send first nibble */
     LCD_PORT_OUT &= ~LCD_DATA_BITS;
-    LCD_PORT_OUT |= ((data >> 4) | (data << 4)) & LCD_DATA_BITS;
+    LCD_PORT_OUT |= ((LCD_Data >> 4) | (LCD_Data << 4)) & LCD_DATA_BITS;
     LCD_E_Pulse();
     
     LCD_PORT_OUT &= ~LCD_DATA_BITS;
-    LCD_PORT_OUT |= (data) & LCD_DATA_BITS;
+    LCD_PORT_OUT |= (LCD_Data) & LCD_DATA_BITS;
     LCD_E_Pulse();
 
     LCD_PORT_DIR |= LCD_DATA_BITS; /* make LCD data bits inputs */
+}
+
+static void LCD_Busy(void)
+{
+    if (LCD_BusyBit)
+    {
+        unsigned char LCD_Data;
+    
+        LCD_PORT_DIR |= LCD_DATA_BITS; /* make LCD data bits inputs */
+        LCD_Data = 0;
+
+        RS_PIN = 0;
+        RW_PIN = 1;
+        do
+        {
+            LCD_Data = LCD_GetByte();
+        } while (LCD_Data & LCD_BusyBit);
+    }
+    else
+    {
+        LCD_Delay(); /* use 5ms delay when busy bit is unknown */
+    }
 }
 
 void LCD_Init(void) 
@@ -205,12 +195,16 @@ void LCD_Init(void)
     E_PIN_DIR = 0;                  /* make LCD Enable strobe an output */
     RW_PIN_DIR = 0;                 /* make LCD Read/Write select an output */
     RS_PIN_DIR = 0;                 /* make LCD Register select an output */
+#ifdef LCD_POWER_EN_DIR
     LCD_POWER_EN_DIR = 0;           /* make LCD Power enable an output */
+#endif
     E_PIN = 0;                      /* set LCD Enable strobe to not active */
     RW_PIN = 0;                     /* set LCD Read/Write select to Write */
     RS_PIN = 0;                     /* set LCD Register select to command group */
     LCD_PORT_OUT &= ~LCD_DATA_BITS; /* set LCD data bits to zero */
+#ifdef LCD_POWER_EN
     LCD_POWER_EN = 1;               /* Turn on LCD power */
+#endif
     LCD_DelayPOR();                 /* wait for LCD power on to complete */
 
     /* Force LCD to 8-bit mode */
@@ -236,6 +230,7 @@ void LCD_Init(void)
      */
     LCD_SetDDRamAddr(LINE_ONE+1);
     LCD_Busy();
+    RS_PIN = 0;
     LCD_Data = LCD_GetByte();
 
     if (LCD_Data == 0x01)
