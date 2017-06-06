@@ -128,7 +128,8 @@ void Init_PIC( void )
     PIE7   = 0;
 
     /* Do system clock setup */
-    OSCFRQ  = 0;            /* Set internal HFRC to 32MHz */
+    OSCCON1 = 0b01100000;   /* Switch to internal HFINTOSC at 32MHz no divisor */
+    OSCFRQ  = 0b110;        /* Set internal HFINTOSC divisor for 32MHz */
     OSCTUNE = 0;            /* Set oscillator tuning to factory default */
     
     /* Make all GPIO pins digital */
