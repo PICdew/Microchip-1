@@ -1,8 +1,6 @@
 /*
  * File:   lcd.c
- * Author: 
  *
- * Target: PIC16F18877
  */
 
 #include <xc.h>

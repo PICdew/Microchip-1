@@ -1,7 +1,5 @@
 /*
  * File:   lcd.h
- * Author: 
- * Target: PIC18F4550
  *
  */
 #ifndef LCD_H
