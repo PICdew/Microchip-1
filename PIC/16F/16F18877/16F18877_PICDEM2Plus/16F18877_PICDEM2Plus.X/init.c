@@ -159,8 +159,8 @@ void Init_PIC( void )
     CCP3PPS    = RPI_RB5;      /* RB | RD */
     CCP4PPS    = RPI_RB0;      /* RB | RD */
     CCP5PPS    = RPI_RA4;      /* RA | RE */
-    SMT1WINPPS = RPI_RC0;      /* RB      */
-    SMT1SIGPPS = RPI_RC1;      /* RB      */
+    SMT1WINPPS = RPI_RC0;      /* RB | RC */
+    SMT1SIGPPS = RPI_RC1;      /* RB | RC */
     SMT2WINPPS = RPI_RB4;      /* RB | RD */
     SMT2SIGPPS = RPI_RB5;      /* RB | RD */
     CWG1PPS    = RPI_RB0;      /* RB | RD */
