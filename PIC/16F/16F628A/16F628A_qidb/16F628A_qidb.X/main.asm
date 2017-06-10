@@ -122,10 +122,12 @@ start:
 ;------------------------------------------------------------------------
 ;
 #define Q_DEBOUNCE_TICKS (4)
+#define PULSE_TICKS (5)
+;
 MAIN_DATA udata 0x20        ; locate in bank0
 Q_InSample          res 1
-Q_DebounceCounter   res 1
-Ticks               res 1
+Q_DebounceTimer     res 1
+PulseTimer          res 1
 
 MAIN_CODE code
 ;
@@ -143,7 +145,7 @@ main:
     clrf    TMR0
     bcf     INTCON,T0IF
     bsf     PORTA,0         ; Release data update available
-    clrf    Ticks
+    clrf    PulseTimer
 
 AppLoop:
     movf    PORTB,W
@@ -151,16 +153,31 @@ AppLoop:
     andlw   0xF0
     btfss   STATUS,Z        ; skip if inputs unchanged
     goto    Q_InputsChanging
-
-    movlw   Q_DEBOUNCE_TICKS
-    subwf   Q_DebounceCounter,W
-    btfsc   STATUS,C        ; skip of input not stable long enough
+    movf    Q_DebounceTimer,F
+    btfsc   STATUS,Z        ; skip if input not stable long enough
     goto    Q_InputsStable
-    goto    CheckTimerAndLoop
+CheckTimerAndLoop:
+    btfss   INTCON,T0IF     ; skip if 1.024 milliseconds have gone by
+    goto    AppLoop
+    bcf     INTCON,T0IF
+    movf    PulseTimer,F
+    btfss   STATUS,Z        ; skip if Tick count has timed out
+    decfsz  PulseTimer,F    ; skip when pulse timer counts from one to zero
+    goto    PulseHasTimedOut
+    movlw   0xFF
+    tris    PORTB           ; make all PORTB input pins
+    bsf     PORTA,0         ; Release data update available at 5 milliseconds
+PulseHasTimedOut:
+    movf    Q_DebounceTimer,F
+    btfss   STATUS,Z        ; skip if inputs stable
+    decf    Q_DebounceTimer,F
+    goto    AppLoop
+
 Q_InputsChanging:
     xorwf   Q_InSample,F    ; update input sample
-    clrf    Q_DebounceCounter
-    clrf    Ticks
+    movlw   Q_DEBOUNCE_TICKS
+    movwf   Q_DebounceTimer
+    clrf    PulseTimer
     movlw   0xFF
     tris    PORTB           ; make all PORTB input pins
     bsf     PORTA,0         ; Release data update available
@@ -178,27 +195,8 @@ Q_InputsStable:
     bcf     PORTA,0         ; Assert data update available
     movlw   0xF0
     tris    PORTB           ; Make pins 0-3 outputs
-    movlw   5               ; Start pulse timeout
-    movwf   Ticks
+    movlw   PULSE_TICKS     ; Start pulse timeout
+    movwf   PulseTimer
     goto    CheckTimerAndLoop
-
-CheckTimerAndLoop:
-    btfss   INTCON,T0IF     ; skip if 1.024 milliseconds have gone by
-    goto    AppLoop
-    bcf     INTCON,T0IF
-    movf    Ticks,F
-    btfss   STATUS,Z        ; skip if Tick count has timed out
-    decfsz  Ticks,F         ; skip when pulse timer counts from one to zero
-    goto    PulseHasTimedOut
-    movlw   0xFF
-    tris    PORTB           ; make all PORTB input pins
-    bsf     PORTA,0         ; Release data update available at 5 milliseconds
-
-PulseHasTimedOut:
-    movlw   Q_DEBOUNCE_TICKS
-    subwf   Q_DebounceCounter,W
-    btfss   STATUS,C        ; skip if debounce counts at maximum
-    incf    Q_DebounceCounter,F
-    goto    AppLoop
 
     END
