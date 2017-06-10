@@ -20,6 +20,7 @@
                    displayName="Important Files"
                    projectFiles="false">
       <itemPath>Makefile</itemPath>
+      <itemPath>16F628A_qidb.sbs</itemPath>
     </logicalFolder>
   </logicalFolder>
   <sourceRootList>
