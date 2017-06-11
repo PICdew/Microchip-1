@@ -114,7 +114,7 @@ enum
     RPO_NONE      = 0x00
 };
 
-void Init_PIC( void )
+void PIC_Init( void )
 {
     /* Disable all interrupt sources */
     INTCON = 0;

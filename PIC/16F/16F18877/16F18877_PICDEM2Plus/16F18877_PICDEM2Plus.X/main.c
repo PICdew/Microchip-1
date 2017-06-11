@@ -49,7 +49,29 @@
 #include <stdlib.h>
 #include "init.h"
 #include "lcd.h"
-
+#include "buttons.h"
+/*
+ * Global Data 
+ */
+unsigned char gButtonEvent;
+/*
+ * Initialize TIMER0
+ */
+void TIMER0_Init( void )
+{
+    PIE0bits.TMR0IE = 0;         /* disable TIMER0 interrupts */
+    T0CON0 = 0;                  /* stop TIMER0 */
+    T0CON1 = 0;
+    T0CON1bits.T0CKPS  = 0b0101; /* set prescale at 1:32 */
+    T0CON1bits.T0ASYNC = 0;      /* The input to the TMR0 counter is synchronized to FOSC/4 */
+    T0CON1bits.T0CS    = 0b010;  /* set clock source to FOSC/4 (8MHz) */
+    TMR0H = 250-1;               /* set reload count */
+    TMR0L = 0;                   /* start count from zero */
+    PIR0bits.TMR0IF = 0;         /* clear interrupt request */
+    PIE0bits.TMR0IE = 1;         /* enable TIMER0 interrupt source */
+    INTCONbits.PEIE = 1;         /* enable peripheral interrupts */
+    T0CON0bits.T0EN = 1;         /* start TIMER0 */
+}
 /*
  * Display application name and version
  */
@@ -75,25 +97,103 @@ void ShowVersion(void)
     LCD_WriteString(buffer);
 }
 /*
+ * Display application name and version
+ */
+void ShowLCDSymbols(unsigned char Symbol)
+{
+    unsigned char buffer[17];
+    unsigned char count;
+    
+    LCD_SetDDRamAddr(LINE_ONE);
+    LCD_WriteConstString("Symbols:        ");
+    LCD_SetDDRamAddr(LINE_ONE+9);
+    buffer[0] = 0;
+    utoa(buffer,Symbol,10);
+    LCD_WriteString(buffer);
+    LCD_WriteData('-');
+
+    buffer[0] = 0;
+    utoa(buffer,Symbol+15U,10);
+    LCD_WriteString(buffer);
+
+    LCD_SetDDRamAddr(LINE_TWO);
+    for(count = 0; count < 16; count++)
+    {
+        LCD_WriteData(Symbol++);
+    }
+}
+/*
  * Main program
  */
 void main(void) {
     
-    Init_PIC();
+    unsigned char ButtonState;
+    unsigned char LCD_symbols;
+    
+    PIC_Init();
     LCD_Init();
+    TIMER0_Init();
+    Buttons_Init();
+    gButtonEvent = 0;
+    INTCONbits.GIE = 1;
+    LCD_symbols = 0;
 
     /* Display the application name and version information */
     ShowVersion();
     /* Show what is in the character generator RAM */
     LCD_SetDDRamAddr(LINE_TWO);
     LCD_WriteConstString("\010\011\012\013\014\015\016\017"); /* octal byte constants in a string */
-    LCD_WriteConstString(" 17JUN05");
+    LCD_WriteConstString(" 17JUN11");
 
+    TRISB &= 0xF0;      /* make PORTB bits 0-3 outputs */
+    LATB  &= 0xF0;      /* turn off LEDs on PORTB bits 0-3 */
+    
     /*
      * Application loop
      */
     for(;;)
     {
-        
+        if (gButtonEvent)
+        {
+            gButtonEvent = 0;
+            
+            ButtonState = Buttons_GetStatus();
+            if( ButtonState & BUTTON_S2_CHANGE_MASK)
+            { /* if S2 changed */
+                if ( ButtonState & BUTTON_S2_STATE_MASK )
+                { /* is S2 changed to pressed */
+                    ShowLCDSymbols(LCD_symbols);
+                    LCD_symbols += 16;
+                }
+            }
+            if( ButtonState & BUTTON_S3_CHANGE_MASK)
+            { /* if S3 changed */
+                if ( ButtonState & BUTTON_S3_STATE_MASK )
+                { /* is S3 changed to pressed */
+                    LATB = (LATB & 0xF0U) | ((LATB + 1U) & 0x0FU);
+                }
+            }
+        }
+    }
+}
+/*
+ * Interrupt handlers
+ */
+void interrupt ISR_Handler(void)
+{
+    /* Handle system tick */
+    if (PIE0bits.TMR0IE)
+    {
+        if(PIR0bits.TMR0IF)
+        {
+            PIR0bits.TMR0IF = 0;
+            if (Buttons_Poll() & (BUTTON_S2_CHANGE_MASK | BUTTON_S3_CHANGE_MASK))
+            {
+                if(!gButtonEvent)
+                {
+                    gButtonEvent = 1;
+                }
+            }
+        }
     }
 }

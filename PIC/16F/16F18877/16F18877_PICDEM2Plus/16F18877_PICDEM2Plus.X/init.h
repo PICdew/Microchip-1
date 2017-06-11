@@ -17,7 +17,7 @@
 #define MINOR_REV (0)
 #define _XTAL_FREQ FSYS
 
-void Init_PIC( void );
+void PIC_Init( void );
 
 #endif
 

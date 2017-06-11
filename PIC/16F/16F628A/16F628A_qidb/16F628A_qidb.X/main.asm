@@ -142,11 +142,12 @@ main:
     movf    PORTB,W
     andlw   0xF0
     movwf   Q_InSample
+    clrf    Q_DebounceTimer
     clrf    TMR0
     bcf     INTCON,T0IF
     bsf     PORTA,0         ; Release data update available
     clrf    PulseTimer
-
+;
 AppLoop:
     movf    PORTB,W
     xorwf   Q_InSample,W
@@ -172,7 +173,7 @@ PulseHasTimedOut:
     btfss   STATUS,Z        ; skip if inputs stable
     decf    Q_DebounceTimer,F
     goto    AppLoop
-
+;
 Q_InputsChanging:
     xorwf   Q_InSample,F    ; update input sample
     movlw   Q_DEBOUNCE_TICKS
@@ -182,6 +183,7 @@ Q_InputsChanging:
     tris    PORTB           ; make all PORTB input pins
     bsf     PORTA,0         ; Release data update available
     goto    CheckTimerAndLoop
+;
 Q_InputsStable:
     swapf   Q_InSample,W
     xorwf   Q_InSample,W
