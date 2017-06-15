@@ -15,6 +15,7 @@ nbproject/private/
 nbproject/Package-*.bash
 nbproject/Makefile-*
 build/
+debug/
 nbbuild/
 dist/
 nbdist/
