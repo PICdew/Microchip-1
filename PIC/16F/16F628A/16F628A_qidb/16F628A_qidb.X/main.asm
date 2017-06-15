@@ -121,7 +121,7 @@ start:
 ;
 ;------------------------------------------------------------------------
 ;
-#define Q_DEBOUNCE_TICKS (4)
+#define Q_DEBOUNCE_TICKS (20)
 #define PULSE_TICKS (5)
 ;
 MAIN_DATA udata 0x20        ; locate in bank0
@@ -165,9 +165,13 @@ CheckTimerAndLoop:
     btfss   STATUS,Z        ; skip if Tick count has timed out
     decfsz  PulseTimer,F    ; skip when pulse timer counts from one to zero
     goto    PulseHasTimedOut
+    btfsc   PORTA,0         ; skip when pulse output is asserted
+    goto    PulseHasTimedOut
+    bsf     PORTA,0         ; Release data update available at 5 milliseconds
     movlw   0xFF
     tris    PORTB           ; make all PORTB input pins
-    bsf     PORTA,0         ; Release data update available at 5 milliseconds
+    movlw   PULSE_TICKS     ; Start pulse timeout for "not asserted" time
+    movwf   PulseTimer
 PulseHasTimedOut:
     movf    Q_DebounceTimer,F
     btfss   STATUS,Z        ; skip if inputs stable
@@ -178,13 +182,12 @@ Q_InputsChanging:
     xorwf   Q_InSample,F    ; update input sample
     movlw   Q_DEBOUNCE_TICKS
     movwf   Q_DebounceTimer
-    clrf    PulseTimer
-    movlw   0xFF
-    tris    PORTB           ; make all PORTB input pins
-    bsf     PORTA,0         ; Release data update available
     goto    CheckTimerAndLoop
 ;
 Q_InputsStable:
+    movf    PulseTimer,F
+    btfss   STATUS,Z        ; Skip when pulse timer is finished
+    goto    CheckTimerAndLoop
     swapf   Q_InSample,W
     xorwf   Q_InSample,W
     andlw   0x0F
@@ -194,11 +197,11 @@ Q_InputsStable:
     movf    Q_InSample,W
     xorlw   0x0F            ; Reverse direction of rotary switch
     movwf   PORTB           ; Put new data on output bits
-    bcf     PORTA,0         ; Assert data update available
     movlw   0xF0
     tris    PORTB           ; Make pins 0-3 outputs
-    movlw   PULSE_TICKS     ; Start pulse timeout
+    movlw   PULSE_TICKS     ; Start pulse timeout for "asserted" time"
     movwf   PulseTimer
+    bcf     PORTA,0         ; Assert data update available
     goto    CheckTimerAndLoop
 
     END
