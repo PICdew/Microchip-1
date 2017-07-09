@@ -48,7 +48,7 @@
 #define BANK1  (h'080')
 #define BANK2  (h'100')
 #define BANK3  (h'180')
-
+;
 ;
 ; This RAM is used by the Interrupt Service Routine
 ; to save the context of the interrupted code.
@@ -56,15 +56,15 @@ INT_VAR     UDATA_SHR
 w_temp      RES     1       ; variable used for context saving
 status_temp RES     1       ; variable used for context saving
 pclath_temp RES     1       ; variable used for context saving
-
+;
 ;**********************************************************************
 RESET_VECTOR CODE 0x000     ; processor reset vector
     nop                     ; ICD2 needs this
     pagesel start
     goto    start           ; go to beginning of program
-
+;
 INT_VECTOR code 0x004       ; interrupt vector location
-
+;
 INTERRUPT:
     movwf   w_temp          ; save off current W register contents
     movf    STATUS,w        ; move status register into W register
@@ -74,11 +74,9 @@ INTERRUPT:
     movwf   pclath_temp
     movlw   HIGH(INTERRUPT)
     movwf   PCLATH
-
-
+;
 ; ISR code can go here or be located as a called subroutine elsewhere
-
-
+;
     movf    pclath_temp,W
     movwf   PCLATH
     movf    status_temp,w   ; retrieve copy of STATUS register
@@ -86,8 +84,7 @@ INTERRUPT:
     swapf   w_temp,f
     swapf   w_temp,w        ; restore pre-ISR W register contents
     retfie                  ; return from interrupt
-
-
+;
 START_CODE  code
 ;------------------------------------------------------------------------
 start:
@@ -99,25 +96,24 @@ start:
     clrf    INTCON          ; Turn off all interrupt sources
     banksel BANK1
     clrf    (PIE1   ^ BANK1)
-
+;
     movlw   b'00000000'     ; Turn off Comparator voltage reference
     movwf   (VRCON  ^ BANK1)
-
+;
     movlw   b'01010001'     ; Setup OPTION register
                             ; PORTB pull-ups enabled
                             ; TIMER0 clock source is instruction clock
                             ; TIMER0 prescaler is 1:4
     movwf   (OPTION_REG ^ BANK1)
-
+;
     banksel BANK0
-
+;
     movlw   0x07            ; turn off Comparators
     movwf   (CMCON  ^ BANK0)
-
-
+;
     pagesel main
     goto    main
-
+;
 ;
 ;------------------------------------------------------------------------
 ;
@@ -128,7 +124,7 @@ MAIN_DATA udata 0x20        ; locate in bank0
 Q_InSample          res 1
 Q_DebounceTimer     res 1
 PulseTimer          res 1
-
+;
 MAIN_CODE code
 ;
 ;
@@ -199,9 +195,9 @@ Q_InputsStable:
     movwf   PORTB           ; Put new data on output bits
     movlw   0xF0
     tris    PORTB           ; Make pins 0-3 outputs
-    movlw   PULSE_TICKS     ; Start pulse timeout for "asserted" time"
+    movlw   PULSE_TICKS     ; Start pulse timeout for "asserted" time
     movwf   PulseTimer
     bcf     PORTA,0         ; Assert data update available
     goto    CheckTimerAndLoop
-
+;
     END
