@@ -9,8 +9,8 @@
  *        <>  3 : RC7/RP23   :        <> 15 : RB14/RP14  :        <> 27 : RC0/RP16   :        <> 39 : RC3/RP19   :
  *        <>  4 : RC8/RP24   :        <> 16 : RB15/RP15  :        <> 28 : RC1/RP17   :        <> 40 : RC4/RP20   :
  *        <>  5 : RC9/RP25   :        -> 17 : AVSS       :        <> 29 : RC2/RP18   :        <> 41 : RC5/RP21   :
- *        <>  6 : VSS        :        -> 18 : AVDD       :        -> 30 : VDD        :        -> 42 : VSS        :
- *        <>  7 : VCAP       :        -> 19 : MCLR       :        -> 31 : VSS        :        -> 43 : VDD        :
+ *        ->  6 : VSS        :        -> 18 : AVDD       :        -> 30 : VDD        :        -> 42 : VSS        :
+ *        ->  7 : VCAP       :        -> 19 : MCLR       :        -> 31 : VSS        :        -> 43 : VDD        :
  *        <>  8 : RA11/RPI29 :        <> 20 : RA12/RPI30 :        <> 32 : RA13/RPI31 :        <> 44 : RA14/RPI32 :
  *        <>  9 : RB10/PGD2  :        <> 21 : RA0/RP26   :        <> 33 : RA2/OSCI   :        <> 45 : RB5/PGD3  :
  *        <> 10 : RB11/PGC2  :        <> 22 : RA1/RP27   :        <> 34 : RA3/OSCO   :        <> 46 : RB6/PGC3   :
