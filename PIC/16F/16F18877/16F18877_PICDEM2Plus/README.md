@@ -1,7 +1,7 @@
 PIC16F18877 Buttons and LCD interface
 =====================================
 
-PIC assembly language code that runs on the Microchip PICDEM2 Plus (DM163022-1) 
+PIC XC8 C language code that runs on the Microchip PICDEM2 Plus (DM163022-1) 
 
 http://www.microchip.com/Developmenttools/ProductDetails.aspx?PartNO=DM163022-1
 
