@@ -119,6 +119,10 @@ BytePutLCD:
     banksel BANK0
     andwf   LCD_PORT,F      ; Make LCD port bits zero
 
+#ifdef LCD_DATA_ON_HIGH_4_BITS
+    swapf   LCD_byte,F
+#endif
+
     bcf     RW_PIN
 ;
 ; send first 4-bits
@@ -166,6 +170,9 @@ ByteGetLCD:
     swapf   LCD_byte,F
     iorwf   LCD_byte,F
     movf    LCD_byte,W
+#ifdef LCD_DATA_ON_HIGH_4_BITS
+    swapf   LCD_byte,F
+#endif
     return
 ;
 ; Function Name:  SetCGRamAddr
@@ -308,7 +315,7 @@ OpenXLCD:
     call    SetDDRamAddr
 
     call    BusyXLCD
-
+    bcf     RS_PIN
     call    ByteGetLCD
     xorlw   0x01
     skpnz
