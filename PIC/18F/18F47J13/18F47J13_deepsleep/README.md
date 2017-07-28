@@ -1,4 +1,4 @@
-# PIC18F24J13 Deep Sleep Demo
+# PIC18F47J13 Deep Sleep Demo
 =============================
 
 Initialize the PIC to start with the default INTOSC at 4MHz, change to 8MHz then setup for deep sleep.
