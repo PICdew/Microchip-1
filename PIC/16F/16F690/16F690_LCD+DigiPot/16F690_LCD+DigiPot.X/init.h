@@ -14,7 +14,7 @@
 #define FSYS (8000000L)
 #define FCYC (FSYS/4L)
 #define MAJOR_REV (1)
-#define MINOR_REV (0)
+#define MINOR_REV (1)
 #define _XTAL_FREQ FSYS
 
 void PIC_Init( void );
