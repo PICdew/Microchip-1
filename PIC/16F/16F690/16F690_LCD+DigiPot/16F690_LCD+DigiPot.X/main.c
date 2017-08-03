@@ -46,6 +46,7 @@ void TIMER0_Init( void )
 /*
  * Display application name and version
  */
+
 void ShowVersion(void)
 {
     unsigned char buffer[17];
@@ -66,6 +67,21 @@ void ShowVersion(void)
     buffer[0] = 0;
     utoa(buffer,LCD_GetBusyBitMask(),10);
     LCD_WriteString(buffer);
+    
+    LCD_SetDDRamAddr(LINE_TWO);
+    /* Show what is in the character generator RAM */
+    LCD_WriteConstString("\010\011\012\013\014\015\016\017"); /* octal byte constants in a string */
+    /* Show Application build date */
+    buffer[0] = ' ';
+    buffer[1] =        ""__DATE__""[9];     /* Year, tens */
+    buffer[2] =        ""__DATE__""[10];    /* Year, ones */
+    buffer[3] = ~0x20U&""__DATE__""[0];     /* Month 1st char, force upper case */
+    buffer[4] = ~0x20U&""__DATE__""[1];     /* Month 2nd char, force upper case */
+    buffer[5] = ~0x20U&""__DATE__""[2];     /* Month 3rd char, force upper case */
+    buffer[6] =        ""__DATE__""[4];     /* Day, tens */
+    buffer[7] =        ""__DATE__""[5];     /* Day, ones */
+    buffer[8] = 0;
+    LCD_WriteString(buffer); 
 }
 /*
  * Display application name and version
@@ -75,9 +91,9 @@ void ShowLCDSymbols(unsigned char Symbol)
     unsigned char buffer[17];
     unsigned char count;
     
-    LCD_SetDDRamAddr(LINE_ONE);
+    LCD_SetDDRamAddr(LINE_THREE);
     LCD_WriteConstString("Symbols:        ");
-    LCD_SetDDRamAddr(LINE_ONE+9);
+    LCD_SetDDRamAddr(LINE_THREE+9);
     buffer[0] = 0;
     utoa(buffer,Symbol,10);
     LCD_WriteString(buffer);
@@ -87,7 +103,7 @@ void ShowLCDSymbols(unsigned char Symbol)
     utoa(buffer,Symbol+15U,10);
     LCD_WriteString(buffer);
 
-    LCD_SetDDRamAddr(LINE_TWO);
+    LCD_SetDDRamAddr(LINE_FOUR);
     for(count = 0; count < 16; count++)
     {
         LCD_WriteData(Symbol++);
@@ -111,10 +127,6 @@ void main(void) {
 
     /* Display the application name and version information */
     ShowVersion();
-    /* Show what is in the character generator RAM */
-    LCD_SetDDRamAddr(LINE_TWO);
-    LCD_WriteConstString("\010\011\012\013\014\015\016\017"); /* octal byte constants in a string */
-    LCD_WriteConstString(" 17AUG02");
 
     /*
      * Application loop

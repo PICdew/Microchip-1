@@ -9,7 +9,7 @@
 #define LCD_FORMAT (FOUR_BIT & LINES_5X7)
 
 /* Define the LCD port pins */
-#define LCD_POWER_EN        PORTCbits.RC6
+//#define LCD_POWER_EN        PORTCbits.RC6
 #define E_PIN               PORTBbits.RB4
 #define RW_PIN              PORTCbits.RC5
 #define RS_PIN              PORTCbits.RC4
@@ -17,10 +17,10 @@
 #define LCD_PORT_IN         PORTC
 #define LCD_PORT_OUT        PORTC
 
-#define LCD_POWER_EN_DIR    TRISCbits.TRISC6
+//#define LCD_POWER_EN_DIR    TRISCbits.TRISC6
 #define E_PIN_DIR           TRISBbits.TRISB4
 #define RW_PIN_DIR          TRISCbits.TRISC5
-#define RS_PIN_DIR          TRISCbits.TRISC6
+#define RS_PIN_DIR          TRISCbits.TRISC4
 #define LCD_PORT_DIR        TRISC
 
 /* Clear display command */
