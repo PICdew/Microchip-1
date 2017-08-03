@@ -381,7 +381,7 @@ LCD_message2:
 LCD_message3:
     dt  "Keypad   Ver 1.0",0
 LCD_message4:
-    dt  "LCD test Ver 1.0",0
+    dt  "LCD test Ver 1.2",0
 LCD_message5:
     dt  "Character row   ",0
     END

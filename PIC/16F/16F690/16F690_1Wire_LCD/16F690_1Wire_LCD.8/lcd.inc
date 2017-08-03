@@ -25,9 +25,9 @@
 #undefine ExtSymbol
 ;
 ; Define the LCD port pins
-#define E_PIN         PORTA,2
-#define RW_PIN        PORTB,4
-#define RS_PIN        PORTB,6
+#define E_PIN         PORTB,4
+#define RW_PIN        PORTC,5
+#define RS_PIN        PORTC,4
 #define LCD_DATA_BITS 0x0F
 #define LCD_PORT      PORTC
 
