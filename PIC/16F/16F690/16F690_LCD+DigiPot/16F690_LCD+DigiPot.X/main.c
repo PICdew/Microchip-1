@@ -7,9 +7,9 @@
  *                         PIC16F690
  *                 +----------:_:----------+
  *       PWR ->  1 : VDD               VSS : 20 <- GND
- *           <>  2 : RA5/T1CKI     PGD/RA0 : 19 <> PGD
+ *      DRV1 <>  2 : RA5/T1CKI     PGD/RA0 : 19 <> PGD
  *       U/D <>  3 : RA4           PGC/RA1 : 18 <> PGC
- *       VPP ->  4 : RA3/VPP     T0CKI/RA2 : 17 <> 
+ *       VPP ->  4 : RA3/VPP     T0CKI/RA2 : 17 <> SW
  *   LCD_R/W <>  5 : RC5               RC0 : 16 <> LCD_D4  
  *    LCD_RS <>  6 : RC4               RC1 : 15 <> LCD_D5  
  *    LCD_D7 <>  7 : RC3               RC2 : 14 <> LCD_D6  
