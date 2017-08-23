@@ -3,7 +3,6 @@
     .sbttl " PORTA bit pulser"
     .psize 1000,132
     .list
-    .include "main.h"
 ;   
 ; File: main.s
 ; Target: PIC24FJ1024GB610
@@ -18,7 +17,7 @@
     .include "p24Fxxxx.inc"
     .text
 
-    ; The assembly language "config" macro does not work.
+; The assembly language "config" macro does not work.
 ;
 ; The linker script does not locate the sections declared here
 ; in the configuration space. They are placed at the end of the
