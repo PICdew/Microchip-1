@@ -6,7 +6,7 @@
             <name>24FJ1024GB610_asm</name>
             <creation-uuid>6b69d8f9-ce67-41a6-a1ee-d7c1397529af</creation-uuid>
             <make-project-type>0</make-project-type>
-            <c-extensions/>
+            <c-extensions>c</c-extensions>
             <cpp-extensions/>
             <header-extensions/>
             <asminc-extensions/>
