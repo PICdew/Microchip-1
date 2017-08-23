@@ -28,62 +28,62 @@
 ; configuration words using the "#pragma config ..." syntax.
 ;
     .if 0
-    config  FBOOT,(BTMODE_SINGLE)
-    config  FSEC,(BWRP_OFF & BSS_OFF & BSEN_OFF & GWRP_OFF & GSS_OFF & CWRP_OFF & CSS_DIS & AIVTDIS_ENABLE)
-    config  FBSLIM,(0x1FFF)
-    config  FOSCSEL,(FNOSC_FRC & PLLMODE_PLL96DIV2 & IESO_OFF)
-    config  FOSC,(POSCMD_HS & OSCIOFCN_ON & SOSCSEL_ON & PLLSS_PLL_FRC & IOL1WAY_OFF & FCKSM_CSECMD)
-    config  FWDT,(WDTPS_PS32768 & FWPSA_PR128 & SWON & WINDIS_OFF & PS25_0 & WDTCMX_WDTCLK & WDTCLK_LPRC)
-    config  FPOR,(SWC & LPCFG_OFF & DNVPEN_ENABLE)
-    config  FICD,(PGX2 & JTAGEN_ON & BTSWP_OFF)
-    config  FDEVOPT1,(ALTCMPI_DISABLE & TMPRPIN_OFF & SOSCHP_OFF & ALTVREF_ALTREFEN)
+        config  FBOOT,(BTMODE_SINGLE)
+        config  FSEC,(BWRP_OFF & BSS_OFF & BSEN_OFF & GWRP_OFF & GSS_OFF & CWRP_OFF & CSS_DIS & AIVTDIS_ENABLE)
+        config  FBSLIM,(0x1FFF)
+        config  FOSCSEL,(FNOSC_FRC & PLLMODE_PLL96DIV2 & IESO_OFF)
+        config  FOSC,(POSCMD_HS & OSCIOFCN_ON & SOSCSEL_ON & PLLSS_PLL_FRC & IOL1WAY_OFF & FCKSM_CSECMD)
+        config  FWDT,(WDTPS_PS32768 & FWPSA_PR128 & SWON & WINDIS_OFF & PS25_0 & WDTCMX_WDTCLK & WDTCLK_LPRC)
+        config  FPOR,(SWC & LPCFG_OFF & DNVPEN_ENABLE)
+        config  FICD,(PGX2 & JTAGEN_ON & BTSWP_OFF)
+        config  FDEVOPT1,(ALTCMPI_DISABLE & TMPRPIN_OFF & SOSCHP_OFF & ALTVREF_ALTREFEN)
     .else
 ; MCHP configuration words
 ; Configuration word @ 0x00801800
-	.pushsection	.config_BTMODE, code, address(0x801800), keep
+        .pushsection    .config_BTMODE, code, address(0x801800), keep
 __config_BTMODE:
-	.pword	65535
-	.popsection
+        .pword  65535
+        .popsection
 ; Configuration word @ 0x000abf2c
-	.pushsection	.config_ALTVREF, code, address(0xabf2c), keep
+        .pushsection    .config_ALTVREF, code, address(0xabf2c), keep
 __config_ALTVREF:
-	.pword	16777207
-	.popsection
+        .pword  16777207
+        .popsection
 ; Configuration word @ 0x000abf28
-	.pushsection	.config_BTSWP, code, address(0xabf28), keep
+        .pushsection    .config_BTSWP, code, address(0xabf28), keep
 __config_BTSWP:
-	.pword	16777182
-	.popsection
+        .pword  16777182
+        .popsection
 ; Configuration word @ 0x000abf24
-	.pushsection	.config_DNVPEN, code, address(0xabf24), keep
+        .pushsection    .config_DNVPEN, code, address(0xabf24), keep
 __config_DNVPEN:
-	.pword	16777213
-	.popsection
+        .pword  16777213
+        .popsection
 ; Configuration word @ 0x000abf20
-	.pushsection	.config_WDTCLK, code, address(0xabf20), keep
+        .pushsection    .config_WDTCLK, code, address(0xabf20), keep
 __config_WDTCLK:
-	.pword	16777183
-	.popsection
+        .pword  16777183
+        .popsection
 ; Configuration word @ 0x000abf1c
-	.pushsection	.config_FCKSM, code, address(0xabf1c), keep
+        .pushsection    .config_FCKSM, code, address(0xabf1c), keep
 __config_FCKSM:
-	.pword	16777034
-	.popsection
+        .pword  16777034
+        .popsection
 ; Configuration word @ 0x000abf18
-	.pushsection	.config_IESO, code, address(0xabf18), keep
+        .pushsection    .config_IESO, code, address(0xabf18), keep
 __config_IESO:
-	.pword	16776968
-	.popsection
+        .pword  16776968
+        .popsection
 ; Configuration word @ 0x000abf10
-	.pushsection	.config_BSLIM, code, address(0xabf10), keep
+        .pushsection    .config_BSLIM, code, address(0xabf10), keep
 __config_BSLIM:
-	.pword	16777215
-	.popsection
+        .pword  16777215
+        .popsection
 ; Configuration word @ 0x000abf00
-	.pushsection	.config_AIVTDIS, code, address(0xabf00), keep
+        .pushsection    .config_AIVTDIS, code, address(0xabf00), keep
 __config_AIVTDIS:
-	.pword	16744447
-	.popsection
+        .pword  16744447
+        .popsection
     .endif
 
     .global __reset 
