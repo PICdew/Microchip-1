@@ -24,10 +24,11 @@ void PIC_Init( void )
     INTCON  = 0x00;             // disable all interrupt sources
     PIE1    = 0x00; 
     PIE2    = 0x00; 
-    T2CON   = 0x01;             // Turn off Timer2, prescale 1:4, postscale 1:1
+    T2CON   = 0x00;             // Turn off Timer2, prescale 1:4, postscale 1:1
     ADCON0  = 0x00;             // turn off ADC module
     ANSEL   = 0x00;             // make all Analog pins I/O digital
     ANSELH  = 0x00;             // make all Analog pins I/O digital
+    VRCON   = 0x00;             // Turn off comparator voltage ref
     CM1CON0 = 0x00;             // Turn off comparator 1
     CM2CON0 = 0x00;             // Turn off comparator 2
     
