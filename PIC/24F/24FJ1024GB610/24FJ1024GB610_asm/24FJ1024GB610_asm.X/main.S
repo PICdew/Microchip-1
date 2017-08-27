@@ -7,7 +7,7 @@
 ; File: main.s
 ; Target: PIC24FJ1024GB610
 ; IDE: MPLABX v4.00
-; Compiler: XC16 v1.31
+; Compiler: XC16 v1.32B
 ;   
 ; Description:
 ;   This is a simple "hello world" demo
@@ -16,7 +16,7 @@
 ;   
     .include "p24Fxxxx.inc"
     .text
-
+;
 ; The assembly language "config" macro does not work.
 ;
 ; The linker script does not locate the sections declared here
@@ -26,15 +26,27 @@
 ; At present the workaround is to use a "C" file to declare the
 ; configuration words using the "#pragma config ..." syntax.
 ;
-;        config  FBOOT,(BTMODE_SINGLE)
-;        config  FSEC,(BWRP_OFF & BSS_OFF & BSEN_OFF & GWRP_OFF & GSS_OFF & CWRP_OFF & CSS_DIS & AIVTDIS_ENABLE)
-;        config  FBSLIM,(0x1FFF)
-;        config  FOSCSEL,(FNOSC_FRC & PLLMODE_PLL96DIV2 & IESO_OFF)
-;        config  FOSC,(POSCMD_HS & OSCIOFCN_ON & SOSCSEL_ON & PLLSS_PLL_FRC & IOL1WAY_OFF & FCKSM_CSECMD)
-;        config  FWDT,(WDTPS_PS32768 & FWPSA_PR128 & SWON & WINDIS_OFF & PS25_0 & WDTCMX_WDTCLK & WDTCLK_LPRC)
-;        config  FPOR,(SWC & LPCFG_OFF & DNVPEN_ENABLE)
-;        config  FICD,(PGX2 & JTAGEN_ON & BTSWP_OFF)
-;        config  FDEVOPT1,(ALTCMPI_DISABLE & TMPRPIN_OFF & SOSCHP_OFF & ALTVREF_ALTREFEN)
+; The real issue is that the assembly language macro in the
+; p24FJ1025GB610.inc file is now wrong. The section name decoration
+; does not match the name used in the section allocation part of
+; the linker script in the p24FJ1024GB610.gld file.
+;
+        .macro config_ REG, VALUE
+        .pushsection __\REG.sec, code
+        .global \REG
+\REG:   .pword \VALUE|(0xFF<<16)
+        .popsection
+        .endm
+
+    config_  FBOOT,(BTMODE_SINGLE)
+    config_  FSEC,(BWRP_OFF & BSS_OFF & BSEN_OFF & GWRP_OFF & GSS_OFF & CWRP_OFF & CSS_DIS & AIVTDIS_ENABLE)
+    config_  FBSLIM,(0x1FFF)
+    config_  FOSCSEL,(FNOSC_FRC & PLLMODE_PLL96DIV2 & IESO_OFF)
+    config_  FOSC,(POSCMD_HS & OSCIOFCN_ON & SOSCSEL_ON & PLLSS_PLL_FRC & IOL1WAY_OFF & FCKSM_CSECMD)
+    config_  FWDT,(WDTPS_PS32768 & FWPSA_PR128 & SWON & WINDIS_OFF & PS25_0 & WDTCMX_WDTCLK & WDTCLK_LPRC)
+    config_  FPOR,(SWC & LPCFG_OFF & DNVPEN_ENABLE)
+    config_  FICD,(PGX2 & JTAGEN_ON & BTSWP_OFF)
+    config_  FDEVOPT1,(ALTCMPI_DISABLE & TMPRPIN_OFF & SOSCHP_OFF & ALTVREF_ALTREFEN)
 
     .global __reset 
 __reset: 
