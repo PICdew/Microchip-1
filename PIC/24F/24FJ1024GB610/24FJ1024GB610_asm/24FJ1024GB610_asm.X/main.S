@@ -34,7 +34,7 @@
         .macro config_ REG, VALUE
         .pushsection __\REG.sec, code
         .global \REG
-\REG:   .pword \VALUE|(0xFF<<16)
+\REG:   .pword \VALUE
         .popsection
         .endm
 
@@ -45,7 +45,7 @@
     config_  FOSC,(POSCMD_HS & OSCIOFCN_ON & SOSCSEL_ON & PLLSS_PLL_FRC & IOL1WAY_OFF & FCKSM_CSECMD)
     config_  FWDT,(WDTPS_PS32768 & FWPSA_PR128 & SWON & WINDIS_OFF & PS25_0 & WDTCMX_WDTCLK & WDTCLK_LPRC)
     config_  FPOR,(SWC & LPCFG_OFF & DNVPEN_ENABLE)
-    config_  FICD,(PGX2 & JTAGEN_ON & BTSWP_OFF)
+    config_  FICD,(PGX2 & JTAGEN_OFF & BTSWP_OFF)
     config_  FDEVOPT1,(ALTCMPI_DISABLE & TMPRPIN_OFF & SOSCHP_OFF & ALTVREF_ALTREFEN)
 
     .global __reset 
