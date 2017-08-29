@@ -17,22 +17,8 @@
     .include "p24Fxxxx.inc"
     .text
 ;
-; The assembly language "config" macro does not work.
+; Setup configuration words
 ;
-; The linker script does not locate the sections declared here
-; in the configuration space. They are placed at the end of the
-; user code section. 
-;
-; One workaround is to use a "C" file to declare the
-; configuration words using the "#pragma config ..." syntax.
-;
-; The real issue is my failure to read the information in the
-; p24FJ1025GB610.inc file. The symbol that select the configuration
-; to be initialized must be prefixed with two underscore '_'
-; characters. There is a generic example in the .inc file but
-; I did not "see" it.
-;
-
     config  __FBOOT,(BTMODE_SINGLE)
     config  __FSEC,(BWRP_OFF & BSS_OFF & BSEN_OFF & GWRP_OFF & GSS_OFF & CWRP_OFF & CSS_DIS & AIVTDIS_ENABLE)
     config  __FBSLIM,(0x1FFF)
