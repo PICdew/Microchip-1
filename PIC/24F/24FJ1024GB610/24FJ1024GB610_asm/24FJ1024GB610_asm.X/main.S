@@ -17,7 +17,7 @@
     .include "p24Fxxxx.inc"
     .text
 ;
-; The assembly language configuration words.
+; Setup configuration words
 ;
     config  __FBOOT,(BTMODE_SINGLE)
     config  __FSEC,(BWRP_OFF & BSS_OFF & BSEN_OFF & GWRP_OFF & GSS_OFF & CWRP_OFF & CSS_DIS & AIVTDIS_ENABLE)
@@ -26,7 +26,7 @@
     config  __FOSC,(POSCMD_HS & OSCIOFCN_ON & SOSCSEL_ON & PLLSS_PLL_FRC & IOL1WAY_OFF & FCKSM_CSECMD)
     config  __FWDT,(WDTPS_PS32768 & FWPSA_PR128 & SWON & WINDIS_OFF & PS25_0 & WDTCMX_WDTCLK & WDTCLK_LPRC)
     config  __FPOR,(SWC & LPCFG_OFF & DNVPEN_ENABLE)
-    config  __FICD,(PGX2 & JTAGEN_ON & BTSWP_OFF)
+    config  __FICD,(PGX2 & JTAGEN_OFF & BTSWP_OFF)
     config  __FDEVOPT1,(ALTCMPI_DISABLE & TMPRPIN_OFF & SOSCHP_OFF & ALTVREF_ALTREFEN)
 
     .global __reset 
