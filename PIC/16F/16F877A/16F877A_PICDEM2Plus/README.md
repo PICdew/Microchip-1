@@ -1,7 +1,7 @@
 PIC16F877A Buttons and LCD interface
 ====================================
 
-PIC assembly language code that runs on the Microchip PICDEM2 Plus (DM163022-1) 
+PIC assembly language and C source code that runs on the Microchip PICDEM2 Plus (DM163022-1) 
 
 http://www.microchip.com/Developmenttools/ProductDetails.aspx?PartNO=DM163022-1
 
