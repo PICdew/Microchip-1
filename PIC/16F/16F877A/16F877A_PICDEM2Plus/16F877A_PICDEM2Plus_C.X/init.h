@@ -7,7 +7,7 @@
  */
 
 #ifndef INIT_H
-#define	INIT_H
+#define INIT_H
 
 #ifdef __XC8
  #undef COMPILER_NOT_FOUND
@@ -18,6 +18,7 @@
  #elif defined(__16F887__)
   #define TARGET_887
  #else
+   #error "Code does not build for selected target"
  #endif
 #else
  #ifdef __PICC__
@@ -29,6 +30,7 @@
   #elif defined(_16F887)
    #define TARGET_887
   #else
+   #error "Code does not build for selected target"
   #endif
  #endif
 #endif
