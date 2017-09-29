@@ -34,7 +34,6 @@
   // CONFIG2
   #pragma config BOR4V = BOR40V   // Brown-out Reset Selection bit (Brown-out Reset set to 4.0V)
   #pragma config WRT = OFF        // Flash Program Memory Self Write Enable bits (Write protection off)
- #else
  #endif
 #else
  #if defined (TARGET_877A)
@@ -42,7 +41,6 @@
  #elif defined (TARGET_887)
   __CONFIG(FOSC_HS & WDTE_OFF & PWRTE_OFF & MCLRE_ON & CP_OFF & CPD_OFF & BOREN_OFF & IESO_OFF & FCMEN_OFF & LVP_OFF);
   __CONFIG(BOR4V_BOR40V & WRT_OFF);
-  #else
  #endif
 #endif
 
@@ -69,7 +67,6 @@ void PIC_Init( void )
 #elif defined(TARGET_887)
     ANSEL  = 0;
     ANSELH = 0;
-#else
 #endif
 
 }
