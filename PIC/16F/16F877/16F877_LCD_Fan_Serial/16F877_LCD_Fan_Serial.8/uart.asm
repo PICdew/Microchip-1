@@ -175,7 +175,7 @@ Uart_PutHexNibble:
 ; Function: Uart_PutDec
 ; Description:
 ;   Writes two ASCII character of the
-;   BCD value in thw WREG register.
+;   BCD value in the WREG register.
 ;
 ; Inputs:   WREG = 8-bit BCD value to convert to ASCII and send to the LCD
 ;           CARRY = 1 suppress zero of MSD
@@ -259,12 +259,12 @@ Uart_Putrs:
     iorlw   0
     skpnz
     return
-    call   Uart_Putc
+    call    Uart_Putc
     banksel Uart_pszRomStr
     incf    Uart_pszRomStr,F
     skpnz
     incf    Uart_pszRomStr+1,F
-    goto   Uart_Putrs
+    goto    Uart_Putrs
     
 Uart_TableLookUp:
     banksel Uart_pszRomStr
