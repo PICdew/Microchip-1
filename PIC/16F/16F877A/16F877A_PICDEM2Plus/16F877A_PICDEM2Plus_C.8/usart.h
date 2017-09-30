@@ -41,19 +41,22 @@
     
     
     
-typedef enum eUART_CONFIG {UART_READ,UART_WRITE,UART_READ_AND_WRITE} UART_CONFIG;
-typedef enum eUART_MODE {UART_ASYNC,UART_SYNC_MASTER,UART_SYNC_SLAVE} UART_MODE;
-typedef enum eUART_BAUD {UART_BAUD_NONE=0,UART_BAUD_MAXIMUM,UART_BAUD_38400,UART_BAUD_19200,UART_BAUD_9600,UART_BAUD_4800,UART_BAUD_2400} UART_BAUD;
+typedef enum eUSART_CONFIG {USART_READ,USART_WRITE,USART_READ_AND_WRITE} USART_CONFIG;
+typedef enum eUSART_MODE {USART_ASYNC,USART_SYNC_MASTER,USART_SYNC_SLAVE} USART_MODE;
+typedef enum eUSART_BAUD {USART_BAUD_NONE=0,USART_BAUD_MAXIMUM,USART_BAUD_38400,USART_BAUD_19200,USART_BAUD_9600,USART_BAUD_4800,USART_BAUD_2400} USART_BAUD;
+typedef enum eUSART_9TH_BIT {USART_9TH_BIT_OFF,USART_9TH_BIT_ON} USART_9TH_BIT;
     
     
-extern unsigned char OERRcounter;
-extern unsigned char FERRcounter;
+extern volatile unsigned char OERRcounter;
+extern volatile unsigned char FERRcounter;
     
     
-extern void UART_Init(UART_BAUD baudselect, UART_CONFIG conf, UART_MODE mode, unsigned char nine);
-extern void UART_Write(unsigned char data);
-extern unsigned char UART_TX_Empty( void );
-extern unsigned char UART_Data_Ready( void );
-extern unsigned char UART_Read(unsigned char *buffer);
+extern void USART_Init(USART_BAUD baudselect, USART_CONFIG conf, USART_MODE mode, USART_9TH_BIT nineth_bit);
+extern void USART_Write(unsigned char data);
+extern void USART_WriteConstString(const unsigned char *pBuffer);
+void USART_WriteString(unsigned char *pBuffer);
+extern unsigned char USART_TX_Empty( void );
+extern unsigned char USART_Data_Ready( void );
+extern unsigned char USART_Read(unsigned char *buffer);
     
 #endif

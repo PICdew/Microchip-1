@@ -42,9 +42,11 @@
 
 #define FSYS (20000000L)
 #define FCYC (FSYS/4L)
-#define MAJOR_REV (1)
-#define MINOR_REV (0)
 #define _XTAL_FREQ FSYS
+
+#define APP_MESSAGE "LCD Test "
+#define MAJOR_REV (1)
+#define MINOR_REV (1)
 
 void PIC_Init( void );
 

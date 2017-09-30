@@ -50,32 +50,8 @@
 #include "init.h"
 #include "lcd.h"
 #include "buttons.h"
-/*
- * Replacement for standard library function
- */
-char *
-utoa(char * buf, unsigned val, int base)
-{
-    unsigned    v;
-    unsigned char   c;
-
-    v = val;
-    do {
-        v /= base;
-        buf++;
-    } while(v != 0);
-    *buf-- = 0;
-    do {
-        c = (unsigned char)(val % base);
-        val /= base;
-        if(c >= 10)
-            c += (unsigned char)('A')-(unsigned char)('0')-10;
-        c += '0';
-        *buf-- = c;
-    } while(val != 0);
-    return buf;
-}
-
+#include "usart.h"
+#include "utility.h"
 /*
  * Global Data 
  */
@@ -98,21 +74,28 @@ void ShowVersion(void)
     unsigned char buffer[17];
     
     LCD_SetDDRamAddr(LINE_ONE);
-    LCD_WriteConstString("LCD Test ");
+    LCD_WriteConstString(APP_MESSAGE);
+    USART_WriteConstString(APP_MESSAGE);
 
     buffer[0] = 0;
-    utoa(buffer,MAJOR_REV,10);
+    BinToDecASCII(buffer,MAJOR_REV);
     LCD_WriteString(buffer);
     LCD_WriteData('.');
+    USART_WriteString(buffer);
+    USART_Write('.');
 
     buffer[0] = 0;
-    utoa(buffer,MINOR_REV,10);
+    BinToDecASCII(buffer,MINOR_REV);
     LCD_WriteString(buffer);
     LCD_WriteData('.');
+    USART_WriteString(buffer);
+    USART_Write('.');
 
     buffer[0] = 0;
-    utoa(buffer,LCD_GetBusyBitMask(),10);
+    BinToDecASCII(buffer,LCD_GetBusyBitMask());
     LCD_WriteString(buffer);
+    USART_WriteString(buffer);
+    USART_WriteConstString("\r\n");
 }
 /*
  * Display application name and version
@@ -126,12 +109,12 @@ void ShowLCDSymbols(unsigned char Symbol)
     LCD_WriteConstString("Symbols:        ");
     LCD_SetDDRamAddr(LINE_ONE+9);
     buffer[0] = 0;
-    utoa(buffer,Symbol,10);
+    BinToDecASCII(buffer,Symbol);
     LCD_WriteString(buffer);
     LCD_WriteData('-');
 
     buffer[0] = 0;
-    utoa(buffer,Symbol+15U,10);
+    BinToDecASCII(buffer,Symbol+15U);
     LCD_WriteString(buffer);
 
     LCD_SetDDRamAddr(LINE_TWO);
@@ -141,20 +124,36 @@ void ShowLCDSymbols(unsigned char Symbol)
     }
 }
 /*
+ *
+ */
+void DoNextState_LCD(void) 
+{
+    static unsigned char LCD_symbols = 0;
+    ShowLCDSymbols(LCD_symbols);
+    LCD_symbols += 16;
+}
+/*
+ *
+ */
+void DoNextState_LED(void) 
+{
+    PORTB = (PORTB & 0xF0U) | ((PORTB + 1U) & 0x0FU);
+}
+/*
  * Main program
  */
 void main(void) {
     
     unsigned char ButtonState;
-    unsigned char LCD_symbols;
+    unsigned char USART_Data;
     
     PIC_Init();
     LCD_Init();
     TIMER0_Init();
+    USART_Init(USART_BAUD_9600, USART_READ_AND_WRITE, USART_ASYNC, USART_9TH_BIT_OFF);
     Buttons_Init();
     gButtonEvent = 0;
     INTCONbits.GIE = 1;
-    LCD_symbols = 0;
 
     /* Display the application name and version information */
     ShowVersion();
@@ -165,14 +164,39 @@ void main(void) {
 
     TRISB &= 0xF0;      /* make PORTB bits 0-3 outputs */
     PORTB &= 0xF0;      /* turn off LEDs on PORTB bits 0-3 */
-    
+
+    USART_WriteConstString("Type the character 1 to show next group of symbols on the LCD.\r\n");    
+    USART_WriteConstString("Type the character 2 to increment the LED pattern.\r\n");    
     /*
      * Application loop
      */
     for(;;)
     {
+        if(USART_Data_Ready())
+        {
+            USART_Read(&USART_Data);
+
+            /* call stack goes too deep to allow interrupts */
+            INTCONbits.GIE = 0;
+            switch (USART_Data)
+            {
+                case '1':
+                    DoNextState_LCD();
+                    break;
+
+                case '2':   
+                    DoNextState_LED();
+                    break;
+                default:
+                    break;
+            }
+            INTCONbits.GIE = 1;
+        }
+
         if (gButtonEvent)
         {
+            /* call stack goes too deep to allow interrupts */
+            INTCONbits.GIE = 0;
             gButtonEvent = 0;
             
             ButtonState = Buttons_GetStatus();
@@ -180,17 +204,17 @@ void main(void) {
             { /* if S2 changed */
                 if ( ButtonState & BUTTON_S2_STATE_MASK )
                 { /* is S2 changed to pressed */
-                    ShowLCDSymbols(LCD_symbols);
-                    LCD_symbols += 16;
+                    DoNextState_LCD();
                 }
             }
             if( ButtonState & BUTTON_S3_CHANGE_MASK)
             { /* if S3 changed */
                 if ( ButtonState & BUTTON_S3_STATE_MASK )
                 { /* is S3 changed to pressed */
-                    PORTB = (PORTB & 0xF0U) | ((PORTB + 1U) & 0x0FU);
+                    DoNextState_LED();
                 }
             }
+            INTCONbits.GIE = 1;
         }
     }
 }
