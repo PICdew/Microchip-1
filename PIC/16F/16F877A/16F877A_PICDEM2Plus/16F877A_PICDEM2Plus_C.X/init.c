@@ -54,7 +54,7 @@ void PIC_Init( void )
 
     /*
      * Pull-ups off, INT edge low to high, WDT prescale 1:1
-     * TMR0 clock edge low to high, TMR0 clock = FCY, TMR0 prescale 1:4
+     * TMR0 clock edge low to high, TMR0 clock = FCY, TMR0 prescale 1:16
      * TIMER0 will assert the overflow flag every 256*16 (4096)
      * instruction cycles, with a 20MHz oscilator this ia 0.8192 milliseconds.
      */
