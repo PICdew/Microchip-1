@@ -29,4 +29,9 @@ Adding code to interface with the RS232 serial, I2C EEPROM, ADC input and
 buzzer interfaces is left to others.
 
 On 2017-SEP-30: 
+
 Added support for RS232 serial interface to the 16F877A_PICDEM2Plus_C projects.
+
+On 2017-OCT-02: 
+
+Add support for keypad, 4x4, Grayhill P/N: 96BB2-006-R
