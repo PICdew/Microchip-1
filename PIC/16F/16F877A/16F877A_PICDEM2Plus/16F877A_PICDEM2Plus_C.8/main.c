@@ -159,8 +159,8 @@ void main(void) {
      */
     for(;;)
     {
-        /* Handle system tick */
-        /*if (!INTCONbits.TMR0IE)*/
+        /* Handle system tick by polling */
+        if (!INTCONbits.TMR0IE)
         {
             if(INTCONbits.TMR0IF)
             {
@@ -178,6 +178,7 @@ void main(void) {
             }
         }
 
+        /* Check for and process uart event */
         if(USART_Data_Ready())
         {
             USART_Read(&USART_Data);
@@ -194,6 +195,7 @@ void main(void) {
             }
         }
 
+        /* Check for and process button event */
         if (gButtonEvent)
         {
             gButtonEvent = 0;
@@ -215,11 +217,14 @@ void main(void) {
             }
         }
 
-        /* check for and process key presses */
+        /* Check for and process keypad event */
         if (Keypad_GetEvent() == eKeyChanged)
         {
             Key = Keypad_GetKey(&Keypad_Event);
-            USART_Write(Key);
+            if (Key != 0)
+            {
+                USART_Write(Key);
+            }
         }
     }
 }
@@ -228,4 +233,5 @@ void main(void) {
  */
 void interrupt ISR_Handler(void)
 {
+    /* This implementation does not use interrupts */
 }

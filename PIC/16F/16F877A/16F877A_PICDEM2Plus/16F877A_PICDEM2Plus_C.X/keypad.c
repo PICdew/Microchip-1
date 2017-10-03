@@ -117,18 +117,32 @@ void Keypad_Scan(void)
 eKeyEvent_t Keypad_GetEvent(void)
 {
     eKeyEvent_t Event;
-    
 
-    INTCONbits.TMR0IE = 0;  /* disable tick to read keypad sample memory */
-    if (KP_Changed == 0)
+    if (INTCONbits.TMR0IE)
     {
-        Event = eNoEvent;
+        INTCONbits.TMR0IE = 0;  /* disable tick to read keypad sample memory */
+        if (KP_Changed == 0)
+        {
+            Event = eNoEvent;
+        }
+        else
+        {
+            Event = eKeyChanged;
+        }
+        INTCONbits.TMR0IE = 1;  /* enable tick */
     }
     else
     {
-        Event = eKeyChanged;
+        if (KP_Changed == 0)
+        {
+            Event = eNoEvent;
+        }
+        else
+        {
+            Event = eKeyChanged;
+        }
     }
-    INTCONbits.TMR0IE = 1;  /* enable tick */
+
     
     return Event;
 }
@@ -143,12 +157,22 @@ unsigned char Keypad_GetKey(KeypadEvent_t * KeypadEvent)
     unsigned int ChangedMask;    
 
     Key = 0;
-    INTCONbits.TMR0IE = 0;  /* disable tick to read keypad sample memory */
-    ButtonMatrix = KP_Stable;
-    ChangedMask  = KP_Changed;
-    /* Tell ISR we have read the current state */
-    KP_Changed = 0;
-    INTCONbits.TMR0IE = 1;  /* enable tick */
+    if (INTCONbits.TMR0IE)
+    {
+        INTCONbits.TMR0IE = 0;  /* disable tick to read keypad sample memory */
+        ButtonMatrix = KP_Stable;
+        ChangedMask  = KP_Changed;
+        /* Tell ISR we have read the current state */
+        KP_Changed = 0;
+        INTCONbits.TMR0IE = 1;  /* enable tick */
+    }
+    else
+    {
+        ButtonMatrix = KP_Stable;
+        ChangedMask  = KP_Changed;
+        /* Tell ISR we have read the current state */
+        KP_Changed = 0;
+    }
 
     /* return current state of the keypad matrix */
     if (KeypadEvent)
@@ -221,9 +245,16 @@ unsigned int Keypad_GetSample(void)
 {
     unsigned int Sample;
     
-    INTCONbits.TMR0IE = 0;  /* disable tick to read keypad sample memory */
-    Sample = KP_Sample;
-    INTCONbits.TMR0IE = 1;  /* enable tick */
+    if (INTCONbits.TMR0IE)
+    {
+        INTCONbits.TMR0IE = 0;  /* disable tick to read keypad sample memory */
+        Sample = KP_Sample;
+        INTCONbits.TMR0IE = 1;  /* enable tick */
+    }
+    else
+    {
+        Sample = KP_Sample;
+    }
     
     return Sample;
 }
