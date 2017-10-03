@@ -36,6 +36,14 @@ void USART_Init(USART_BAUD baudselect, USART_CONFIG conf, USART_MODE mode, USART
             SPBRG = SPBRG_AT_MAXIMUM;
             TXSTAbits.BRGH = 1; /* Setting high speed */
             break;
+        case USART_BAUD_115200:
+            SPBRG = SPBRG_AT_115200;
+            TXSTAbits.BRGH = BRGH_AT_115200;
+            break;
+        case USART_BAUD_57600:
+            SPBRG = SPBRG_AT_57600;
+            TXSTAbits.BRGH = BRGH_AT_57600;
+            break;
         case USART_BAUD_38400:
             SPBRG = SPBRG_AT_38400;
             TXSTAbits.BRGH = BRGH_AT_38400;
@@ -55,6 +63,10 @@ void USART_Init(USART_BAUD baudselect, USART_CONFIG conf, USART_MODE mode, USART
         case USART_BAUD_2400:
             SPBRG = SPBRG_AT_2400;
             TXSTAbits.BRGH = BRGH_AT_2400;
+            break;
+        case USART_BAUD_1200:
+            SPBRG = SPBRG_AT_1200;
+            TXSTAbits.BRGH = BRGH_AT_1200;
             break;
         default:
             /* default is the slowest baud rate */

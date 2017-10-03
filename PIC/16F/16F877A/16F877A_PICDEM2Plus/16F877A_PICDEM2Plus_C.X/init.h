@@ -40,7 +40,7 @@
 #endif
 
 
-#define FSYS (20000000L)
+#define FSYS (18432000L)
 #define FCYC (FSYS/4L)
 #define _XTAL_FREQ FSYS
 

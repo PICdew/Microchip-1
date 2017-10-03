@@ -50,6 +50,7 @@
 #include "init.h"
 #include "lcd.h"
 #include "buttons.h"
+#include "keypad.h"
 #include "usart.h"
 #include "utility.h"
 /*
@@ -64,7 +65,6 @@ void TIMER0_Init( void )
     INTCONbits.TMR0IE = 0;       /* disable TIMER0 interrupts */
     TMR0 = 0;                    /* start count from zero */
     INTCONbits.TMR0IF = 0;       /* clear interrupt request */
-    INTCONbits.TMR0IE = 1;       /* enable TIMER0 interrupt source */
 }
 /*
  * Display application name and version
@@ -124,26 +124,12 @@ void ShowLCDSymbols(unsigned char Symbol)
     }
 }
 /*
- *
- */
-void DoNextState_LCD(void) 
-{
-    static unsigned char LCD_symbols = 0;
-    ShowLCDSymbols(LCD_symbols);
-    LCD_symbols += 16;
-}
-/*
- *
- */
-void DoNextState_LED(void) 
-{
-    PORTB = (PORTB & 0xF0U) | ((PORTB + 1U) & 0x0FU);
-}
-/*
  * Main program
  */
 void main(void) {
-    
+    unsigned char LCD_symbols;
+    unsigned char Key;
+    KeypadEvent_t Keypad_Event;
     unsigned char ButtonState;
     unsigned char USART_Data;
     
@@ -152,8 +138,12 @@ void main(void) {
     TIMER0_Init();
     USART_Init(USART_BAUD_9600, USART_READ_AND_WRITE, USART_ASYNC, USART_9TH_BIT_OFF);
     Buttons_Init();
+    Keypad_Init();
     gButtonEvent = 0;
-    INTCONbits.GIE = 1;
+    LCD_symbols = 0;
+
+    /* keep interrupts off */
+    INTCONbits.GIE = 0;
 
     /* Display the application name and version information */
     ShowVersion();
@@ -162,41 +152,50 @@ void main(void) {
     LCD_WriteConstString("\010\011\012\013\014\015\016\017"); /* octal byte constants in a string */
     LCD_WriteConstString(" 17SEP28");
 
-    TRISB &= 0xF0;      /* make PORTB bits 0-3 outputs */
-    PORTB &= 0xF0;      /* turn off LEDs on PORTB bits 0-3 */
+    USART_WriteConstString("Type a '1' to show next group of symbols on the LCD.\r\n");    
 
-    USART_WriteConstString("Type the character 1 to show next group of symbols on the LCD.\r\n");    
-    USART_WriteConstString("Type the character 2 to increment the LED pattern.\r\n");    
     /*
      * Application loop
      */
     for(;;)
     {
+        /* Handle system tick */
+        /*if (!INTCONbits.TMR0IE)*/
+        {
+            if(INTCONbits.TMR0IF)
+            {
+                INTCONbits.TMR0IF = 0;
+                Keypad_Scan();
+
+                if (Buttons_Poll() & (BUTTON_S2_CHANGE_MASK | BUTTON_S3_CHANGE_MASK))
+                {
+                    if(!gButtonEvent)
+                    {
+                        gButtonEvent = 1;
+                    }
+                }
+
+            }
+        }
+
         if(USART_Data_Ready())
         {
             USART_Read(&USART_Data);
 
-            /* call stack goes too deep to allow interrupts */
-            INTCONbits.GIE = 0;
             switch (USART_Data)
             {
                 case '1':
-                    DoNextState_LCD();
+                    ShowLCDSymbols(LCD_symbols);
+                    LCD_symbols += 16;
                     break;
 
-                case '2':   
-                    DoNextState_LED();
-                    break;
                 default:
                     break;
             }
-            INTCONbits.GIE = 1;
         }
 
         if (gButtonEvent)
         {
-            /* call stack goes too deep to allow interrupts */
-            INTCONbits.GIE = 0;
             gButtonEvent = 0;
             
             ButtonState = Buttons_GetStatus();
@@ -204,17 +203,23 @@ void main(void) {
             { /* if S2 changed */
                 if ( ButtonState & BUTTON_S2_STATE_MASK )
                 { /* is S2 changed to pressed */
-                    DoNextState_LCD();
+                    ShowLCDSymbols(LCD_symbols);
+                    LCD_symbols += 16;
                 }
             }
             if( ButtonState & BUTTON_S3_CHANGE_MASK)
             { /* if S3 changed */
                 if ( ButtonState & BUTTON_S3_STATE_MASK )
                 { /* is S3 changed to pressed */
-                    DoNextState_LED();
                 }
             }
-            INTCONbits.GIE = 1;
+        }
+
+        /* check for and process key presses */
+        if (Keypad_GetEvent() == eKeyChanged)
+        {
+            Key = Keypad_GetKey(&Keypad_Event);
+            USART_Write(Key);
         }
     }
 }
@@ -223,19 +228,4 @@ void main(void) {
  */
 void interrupt ISR_Handler(void)
 {
-    /* Handle system tick */
-    if (INTCONbits.TMR0IE)
-    {
-        if(INTCONbits.TMR0IF)
-        {
-            INTCONbits.TMR0IF = 0;
-            if (Buttons_Poll() & (BUTTON_S2_CHANGE_MASK | BUTTON_S3_CHANGE_MASK))
-            {
-                if(!gButtonEvent)
-                {
-                    gButtonEvent = 1;
-                }
-            }
-        }
-    }
 }

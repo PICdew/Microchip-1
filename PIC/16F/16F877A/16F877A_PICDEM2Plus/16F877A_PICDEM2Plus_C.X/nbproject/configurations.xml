@@ -9,6 +9,7 @@
       <itemPath>buttons.h</itemPath>
       <itemPath>utility.h</itemPath>
       <itemPath>usart.h</itemPath>
+      <itemPath>keypad.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -23,6 +24,7 @@
       <itemPath>buttons.c</itemPath>
       <itemPath>utility.c</itemPath>
       <itemPath>usart.c</itemPath>
+      <itemPath>keypad.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -38,7 +40,7 @@
     <conf name="default" type="2">
       <toolsSet>
         <developmentServer>localhost</developmentServer>
-        <targetDevice>PIC16F877A</targetDevice>
+        <targetDevice>PIC16F887</targetDevice>
         <targetHeader></targetHeader>
         <targetPluginBoard></targetPluginBoard>
         <platformTool>PICkit2PlatformTool</platformTool>
