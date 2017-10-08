@@ -35,3 +35,7 @@ Added support for RS232 serial interface to the 16F877A_PICDEM2Plus_C projects.
 On 2017-OCT-02: 
 
 Add support for keypad, 4x4, Grayhill P/N: 96BB2-006-R
+
+On 2017-OCT-07: 
+
+Add support to build for PIC16F877

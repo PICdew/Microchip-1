@@ -9,7 +9,16 @@
 #include "init.h"
 
 #if defined(COMPILER_XC8)
- #if defined(TARGET_877A)
+ #if defined(TARGET_877)
+  #pragma config FOSC = HS        /* Oscillator Selection bits (HS oscillator) */
+  #pragma config WDTE = OFF       /* Watchdog Timer Enable bit (WDT disabled) */
+  #pragma config PWRTE = OFF      /* Power-up Timer Enable bit (PWRT disabled) */
+  #pragma config CP = OFF         /* FLASH Program Memory Code Protection bits (Code protection off) */
+  #pragma config BOREN = OFF      /* Brown-out Reset Enable bit (BOR disabled) */
+  #pragma config LVP = OFF        /* Low Voltage In-Circuit Serial Programming Enable bit (RB3 is digital I/O, HV on MCLR must be used for programming) */
+  #pragma config CPD = OFF        /* Data EE Memory Code Protection (Code Protection off) */
+  #pragma config WRT = ON         /* FLASH Program Memory Write Enable (Unprotected program memory may be written to by EECON control) */
+ #elif defined(TARGET_877A)
   #pragma config FOSC = HS        /* Oscillator Selection bits (HS oscillator) */
   #pragma config WDTE = OFF       /* Watchdog Timer Enable bit (WDT disabled) */
   #pragma config PWRTE = OFF      /* Power-up Timer Enable bit (PWRT disabled) */
@@ -36,7 +45,9 @@
   #pragma config WRT = OFF        /* Flash Program Memory Self Write Enable bits (Write protection off) */
  #endif
 #else
- #if defined (TARGET_877A)
+ #if defined (TARGET_877)
+  __CONFIG(FOSC_HS & WDTE_OFF & PWRTE_OFF & CP_OFF & BOREN_OFF & LVP_OFF & CPD_OFF & WRT_ON);
+ #elif defined (TARGET_877A)
   __CONFIG(FOSC_HS & WDTE_OFF & PWRTE_OFF & BOREN_OFF & LVP_OFF & CPD_OFF & WRT_OFF & CP_OFF);
  #elif defined (TARGET_887)
   __CONFIG(FOSC_HS & WDTE_OFF & PWRTE_OFF & MCLRE_ON & CP_OFF & CPD_OFF & BOREN_OFF & IESO_OFF & FCMEN_OFF & LVP_OFF);
@@ -61,7 +72,9 @@ void PIC_Init( void )
     OPTION_REG = 0b11000011;
     
     /* Make all GPIO pins digital */
-#if defined (TARGET_877A)
+#if defined(TARGET_877)
+    ADCON1 = 0x06;
+#elif defined(TARGET_877A)
     CMCON  = 0x07;
     ADCON1 = 0x06;
 #elif defined(TARGET_887)

@@ -224,6 +224,38 @@ void main(void) {
             if (Key != 0)
             {
                 USART_Write(Key);
+                LCD_symbols = Key;
+                switch (Key)
+                {
+                    case '0':
+                    case '1':
+                    case '2':
+                    case '3':
+                    case '4':
+                    case '5':
+                    case '6':
+                    case '7':
+                    case '8':
+                    case '9':
+                        LCD_symbols -= '0';
+                        break;
+                    case 'A':
+                    case 'B':
+                    case 'C':
+                    case 'D':
+                        LCD_symbols -= 'A';
+                        LCD_symbols += 10;
+                        break;
+                    case '*':
+                        LCD_symbols = 14;
+                        break;
+                    case '#':
+                        LCD_symbols = 15;
+                        break;
+                }
+                LCD_symbols <<= 4;
+                ShowLCDSymbols(LCD_symbols);
+                LCD_symbols += 16;
             }
         }
     }

@@ -13,7 +13,9 @@
  #undef COMPILER_NOT_FOUND
  #define COMPILER_XC8
  #include <xc.h>
- #if defined(__16F877A__)
+ #if defined(__16F877__)
+  #define TARGET_877
+ #elif defined(__16F877A__)
   #define TARGET_877A
  #elif defined(__16F887__)
   #define TARGET_887
@@ -25,7 +27,9 @@
   #undef COMPILER_NOT_FOUND
   #define COMPILER_HTC
   #include <htc.h>
-  #if defined(_16F877A)
+  #if defined(_16F877)
+   #define TARGET_877
+  #elif defined(_16F877A)
    #define TARGET_877A
   #elif defined(_16F887)
    #define TARGET_887
