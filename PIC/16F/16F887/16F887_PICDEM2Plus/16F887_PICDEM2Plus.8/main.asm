@@ -1,6 +1,6 @@
 ;
 ; File: main.asm
-; Target: PIC16F877A
+; Target: PIC16F887
 ; IDE: MPLAB v8.92
 ; Compiler: MPASMWIN v5.51
 ;
@@ -13,7 +13,7 @@
 #include "buttons.inc"
 #include "leds.inc"
 ;
-;                         PIC16F877A
+;                         PIC16F887
 ;                 +----------:_:----------+
 ;   S1  VPP ->  1 : MCLR/VPP      PGD/RB7 : 40 <> PGD
 ; R16(0-5V) ->  2 : RA0/AN0       PGC/RB6 : 39 <> PGC
