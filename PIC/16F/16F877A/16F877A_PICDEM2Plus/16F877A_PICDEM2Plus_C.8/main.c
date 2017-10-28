@@ -18,10 +18,10 @@
  *           <> 10 : RE2               VSS : 31 <- GND
  *       PWR -> 11 : VDD               RD7 : 30 -> LCD_ON
  *       GND -> 12 : VSS               RD6 : 29 -> LCD_E
- *      4MHZ -> 13 : RA7/OSC1          RD5 : 28 -> LCD_RW
- *           <- 14 : RA6/OSC2          RD4 : 27 -> LCD_RS
- *           <> 15 : RC0/SOSCO   RX/DT/RC7 : 26 <- RXD
- *           <> 16 : RC1/SOSCI   TX/CK/RC6 : 25 -> TXD
+ * 18.432MHz -> 13 : OSC1              RD5 : 28 -> LCD_RW
+ * 18.432MHz <- 14 : OSC2              RD4 : 27 -> LCD_RS
+ * 32.768KHz <- 15 : RC0/SOSCO   RX/DT/RC7 : 26 <- RXD
+ * 32.768KHz -> 16 : RC1/SOSCI   TX/CK/RC6 : 25 -> TXD
  *    BUZZER <> 17 : RC2/CCP1          RC5 : 24 <>
  *       SCL <> 18 : RC3/SCL       SDA/RC4 : 23 <> SDA
  *    LCD_D4 <> 19 : RD0               RD3 : 22 <> LCD_D7

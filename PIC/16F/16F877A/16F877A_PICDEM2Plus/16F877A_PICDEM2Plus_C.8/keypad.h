@@ -16,7 +16,7 @@
 #define KP_COL1_OUT PORTBbits.RB4
 #define KP_COL2_OUT PORTBbits.RB5
 #define KP_COL3_OUT PORTCbits.RC5
-#define KP_COL4_OUT PORTCbits.RC0
+#define KP_COL4_OUT PORTEbits.RE2
 
 #define KP_ROW1_IN_DIR  TRISBbits.TRISB0
 #define KP_ROW2_IN_DIR  TRISBbits.TRISB1
@@ -25,7 +25,7 @@
 #define KP_COL1_OUT_DIR TRISBbits.TRISB4
 #define KP_COL2_OUT_DIR TRISBbits.TRISB5
 #define KP_COL3_OUT_DIR TRISCbits.TRISC5
-#define KP_COL4_OUT_DIR TRISCbits.TRISC0
+#define KP_COL4_OUT_DIR TRISEbits.TRISE2
 
 enum eKeyEvent
 {
