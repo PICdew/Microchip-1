@@ -1,4 +1,4 @@
-# Microchip PIC templates & examples x1
+# Microchip PIC templates & examples
 
 This repository holds eaxample code for PIC microcontrollers.
 
