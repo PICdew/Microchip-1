@@ -1,0 +1,9 @@
+Microchip MPLAB XC8 C Compiler (Free Mode) V1.45
+Build date: Nov 15 2017
+Part Support Version: 1.45
+Copyright (C) 2017 Microchip Technology Inc.
+License type: Node Configuration
+
+Advisory[1233] Employing 18F2520 errata work-arounds:
+Advisory[1234]  * Corrupted fast interrupt shadow registers
+Warning [1273] ; . Omniscient Code Generation not available in Free mode
