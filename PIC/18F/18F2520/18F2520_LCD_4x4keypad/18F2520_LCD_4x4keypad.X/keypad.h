@@ -43,6 +43,5 @@ void Keypad_Init(void);
 void Keypad_Scan(void);
 eKeyEvent_t Keypad_GetEvent(void);
 unsigned char Keypad_GetKey(KeypadEvent_t * pKeypadEvent);
-unsigned int Keypad_GetSample(void);
 
 #endif

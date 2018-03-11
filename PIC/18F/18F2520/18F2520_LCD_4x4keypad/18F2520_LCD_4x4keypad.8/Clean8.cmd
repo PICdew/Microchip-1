@@ -5,6 +5,10 @@ echo Removing *.$$$ files...
 del *.$$$ /f /q
 echo.
 
+echo Removing *.tmp files...
+del *.tmp /f /q
+echo.
+
 echo Removing *.bkx files...
 del *.bkx /f /q
 echo.

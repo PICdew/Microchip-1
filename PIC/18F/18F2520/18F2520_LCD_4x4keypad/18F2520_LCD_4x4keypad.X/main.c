@@ -19,8 +19,6 @@
 #include "lcd.h"
 #include "tick.h"
 
-#define DISPLAY_UPDATE_PERIOD (147)
-
 volatile unsigned char gScanKeypadFlag;
 
 /*
@@ -50,7 +48,7 @@ void ShowVersion(void)
     /* Show what is in the character generator RAM */
     LCD_SetDDRamAddr(LINE_TWO);
     LCD_WriteString(buffer); 
-    LCD_WriteConstString(" 18MAR10");
+    LCD_WriteConstString(" 18MAR11");
 }
 /*
  * Application
@@ -59,6 +57,7 @@ void main(void)
 {
     unsigned int  KP_sample;
     unsigned char Key;
+    unsigned char KeyPressedMessageFlag;
     KeypadEvent_t Keypad_Event;
     
     PIC_Init();
@@ -71,11 +70,11 @@ void main(void)
 
     /* Display the application name and version information */
     ShowVersion();
-
-    KP_sample = Keypad_GetSample();
-
+    KeyPressedMessageFlag = 0;
+    
     for(;;)
     {
+        /* Scan the kepad matrix about every 2 milliseconds */
         if(gScanKeypadFlag != 0)
         {
             gScanKeypadFlag = 0;
@@ -84,8 +83,17 @@ void main(void)
         /* check for and process key presses */
         if (Keypad_GetEvent() == eKeyChanged)
         {
-            LCD_SetDDRamAddr(LINE_TWO);
-            LCD_WriteConstString("Key Pressed:    ");
+            if (KeyPressedMessageFlag == 0)
+            {
+                KeyPressedMessageFlag = 1;
+                LCD_SetDDRamAddr(LINE_TWO);
+                LCD_WriteConstString("Key Pressed:    ");
+            }
+            else
+            {
+                LCD_SetDDRamAddr(LINE_TWO+13);
+                LCD_WriteData(' ');
+            }
             Key = Keypad_GetKey(NULL);
             if (Key != 0)
             {
@@ -94,14 +102,23 @@ void main(void)
                 switch (Key)
                 {
                     case '0':
+                        break;
                     case '1':
+                        break;
                     case '2':
+                        break;
                     case '3':
+                        break;
                     case '4':
+                        break;
                     case '5':
+                        break;
                     case '6':
+                        break;
                     case '7':
+                        break;
                     case '8':
+                        break;
                     case '9':
                         break;
                     case 'E':

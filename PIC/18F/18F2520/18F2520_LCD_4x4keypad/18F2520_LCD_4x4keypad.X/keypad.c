@@ -32,9 +32,13 @@ void Keypad_Init(void)
     KP_DebounceCounter = 0;
 }
 /*
- * Called from ISR handler to sample all keys
+ * Called from application loop to sample all keys
  * in the keypad matrix, debounce and update the
  * stable state.
+ * 
+ * This function should be called every 1 to 2 milliseconds.
+ * When called too often the buttons do not debounce correctly.
+ * When called too infrequently the buttons seem unresponsive.
  */
 void Keypad_Scan(void)
 {
@@ -115,7 +119,6 @@ eKeyEvent_t Keypad_GetEvent(void)
     eKeyEvent_t Event;
     
 
-    INTCONbits.TMR0IE = 0;  /* disable tick to read keypad sample memory */
     if (KP_Changed == 0)
     {
         Event = eNoEvent;
@@ -124,7 +127,6 @@ eKeyEvent_t Keypad_GetEvent(void)
     {
         Event = eKeyChanged;
     }
-    INTCONbits.TMR0IE = 1;  /* enable tick */
     
     return Event;
 }
@@ -212,15 +214,3 @@ unsigned char Keypad_GetKey(KeypadEvent_t * pKeypadEvent)
     }
     return Key;
 }
-
-unsigned int Keypad_GetSample(void)
-{
-    unsigned int Sample;
-    
-    INTCONbits.TMR0IE = 0;  /* disable tick to read keypad sample memory */
-    Sample = KP_Sample;
-    INTCONbits.TMR0IE = 1;  /* enable tick */
-    
-    return Sample;
-}
-
