@@ -6,6 +6,9 @@
  */
 #ifndef INIT_H
 #define INIT_H
+#include <xc.h>
+#include <stddef.h>
+
 /*   Specify the System clock frequency in Hz */
 #define FSYS (500000ul)
 /*   Specify PIC18F internal oscillator fresuency */

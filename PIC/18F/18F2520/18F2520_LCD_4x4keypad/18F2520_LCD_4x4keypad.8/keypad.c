@@ -5,8 +5,6 @@
  * Target: PIC18F24K20, PIC18F2520
  */
 
-#include <xc.h>
-#include <stddef.h>
 #include "init.h"
 #include "keypad.h"
 

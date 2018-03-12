@@ -11,10 +11,8 @@
  *
  */
 
-#include <xc.h>
-#include <stddef.h>
-#include "main.h"
 #include "init.h"
+#include "main.h"
 #include "keypad.h"
 #include "lcd.h"
 #include "tick.h"
@@ -55,10 +53,8 @@ void ShowVersion(void)
  */
 void main(void) 
 {
-    unsigned int  KP_sample;
     unsigned char Key;
     unsigned char KeyPressedMessageFlag;
-    KeypadEvent_t Keypad_Event;
     
     PIC_Init();
     LCD_Init();

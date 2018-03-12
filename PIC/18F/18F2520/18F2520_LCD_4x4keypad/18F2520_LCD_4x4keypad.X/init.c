@@ -96,7 +96,6 @@
 #pragma config EBTRB = OFF      /* Boot Block Table Read Protection bit (Boot block (000000-0001FFh) is not protected from table reads executed in other blocks) */
 #endif
 
-#include <xc.h>
 #include "init.h"
 
 void PIC_Init(void) {
