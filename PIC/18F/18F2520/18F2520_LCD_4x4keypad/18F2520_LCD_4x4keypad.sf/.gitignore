@@ -1,0 +1,9 @@
+# Swordfish BASIC compiler
+# =========================
+*.scl
+*.sfp
+*.cof
+*.hex
+*.idf
+*.lst
+*.lnk
