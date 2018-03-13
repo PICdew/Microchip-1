@@ -4,59 +4,59 @@
 //
 // Target: PIC18F24K20, PIC18F2520
 //
-module lcd
+Module lcd
 
-include "init_h.bas"
+Include "init_h.bas"
 #define _LCD_DATA_BITS   = $F0
-const LCD_DATA_BITS = _LCD_DATA_BITS
+Const LCD_DATA_BITS = _LCD_DATA_BITS
 
 // Define the LCD port pins
-public dim
-    E_PIN               as LATA.bits(5),
-    RW_PIN              as LATA.bits(4),
-    RS_PIN              as LATA.bits(3),
-    LCD_PORT_IN         as PORTC,
-    LCD_PORT_OUT        as LATC
+Public Dim
+    E_PIN               As LATA.bits(5),
+    RW_PIN              As LATA.bits(4),
+    RS_PIN              As LATA.bits(3),
+    LCD_PORT_IN         As PORTC,
+    LCD_PORT_OUT        As LATC
 
-public dim
-    E_PIN_DIR           as TRISA.bits(5),
-    RW_PIN_DIR          as TRISA.bits(4),
-    RS_PIN_DIR          as TRISA.bits(3),
-    LCD_PORT_DIR        as TRISC
+Public Dim
+    E_PIN_DIR           As TRISA.bits(5),
+    RW_PIN_DIR          As TRISA.bits(4),
+    RS_PIN_DIR          As TRISA.bits(3),
+    LCD_PORT_DIR        As TRISC
 
 // Clear display command
-public const CLEAR_DISPLAY = %00000001
+Public Const CLEAR_DISPLAY = %00000001
 
 // Return home command
-public const RETURN_HOME = %00000010
+Public Const RETURN_HOME = %00000010
 
 // Display ON/OFF Control defines
-public const DON         = %00001111    // Display on
-public const DOFF        = %00001011    // Display off
-public const CURSOR_ON   = %00001111    // Cursor on
-public const CURSOR_OFF  = %00001101    // Cursor off
-public const BLINK_ON    = %00001111    // Cursor Blink
-public const BLINK_OFF   = %00001110    // Cursor No Blink
+Public Const DON         = %00001111    // Display on
+Public Const DOFF        = %00001011    // Display off
+Public Const CURSOR_ON   = %00001111    // Cursor on
+Public Const CURSOR_OFF  = %00001101    // Cursor off
+Public Const BLINK_ON    = %00001111    // Cursor Blink
+Public Const BLINK_OFF   = %00001110    // Cursor No Blink
 
 // Cursor or Display Shift defines
-public const SHIFT_CUR_LEFT    = %00010011    // Cursor shifts to the left
-public const SHIFT_CUR_RIGHT   = %00010111    // Cursor shifts to the right
-public const SHIFT_DISP_LEFT   = %00011011    // Display shifts to the left
-public const SHIFT_DISP_RIGHT  = %00011111    // Display shifts to the right
+Public Const SHIFT_CUR_LEFT    = %00010011    // Cursor shifts to the left
+Public Const SHIFT_CUR_RIGHT   = %00010111    // Cursor shifts to the right
+Public Const SHIFT_DISP_LEFT   = %00011011    // Display shifts to the left
+Public Const SHIFT_DISP_RIGHT  = %00011111    // Display shifts to the right
 
 // Function Set defines
-public const FOUR_BIT   = %00101111    // 4-bit Interface
-public const EIGHT_BIT  = %00111111    // 8-bit Interface
-public const LINE_5X7   = %00110011    // 5x7 characters, single line
-public const LINE_5X10  = %00110111    // 5x10 characters
-public const LINES_5X7  = %00111011    // 5x7 characters, multiple line
+Public Const FOUR_BIT   = %00101111    // 4-bit Interface
+Public Const EIGHT_BIT  = %00111111    // 8-bit Interface
+Public Const LINE_5X7   = %00110011    // 5x7 characters, single line
+Public Const LINE_5X10  = %00110111    // 5x10 characters
+Public Const LINES_5X7  = %00111011    // 5x7 characters, multiple line
 
 // Start address of each line
-public const LINE_ONE    = $00
-public const LINE_TWO    = $40
+Public Const LINE_ONE    = $00
+Public Const LINE_TWO    = $40
 
 // Define the LCD interface and character size
-public const LCD_FORMAT = FOUR_BIT and LINES_5X7
+Public Const LCD_FORMAT = FOUR_BIT And LINES_5X7
 
 #if (_LCD_DATA_BITS = $0F)
   #define LCD_DATA_ON_LOW_4_BITS
@@ -68,9 +68,9 @@ public const LCD_FORMAT = FOUR_BIT and LINES_5X7
   #endif
 #endif
 
-dim LCD_BusyBit as byte
+Dim LCD_BusyBit As Byte
 
-const CGRAM_Table() as byte =
+Const CGRAM_Table() As Byte =
 (
     %10000000, // CGRAM character 1
     %10000100,
@@ -147,13 +147,13 @@ const CGRAM_Table() as byte =
     %00000000  // End of table marker
 )
 
-inline sub Nop()
-    asm
-        NOP
-    end asm
-end sub
+Inline Sub Nop()
+    Asm
+        Nop
+    End Asm
+End Sub
 
-sub LCD_E_Pulse()
+Sub LCD_E_Pulse()
     E_PIN = 1
     WREG = PORTC
     Nop()
@@ -174,139 +174,139 @@ sub LCD_E_Pulse()
     Nop()
     Nop()
     Nop()
-end sub
+End Sub
 
-sub LCD_DelayPOR()
-    delayms(15)
-end sub
+Sub LCD_DelayPOR()
+    DelayMS(15)
+End Sub
 
-sub LCD_Delay()
-    delayms(5)
-end sub
+Sub LCD_Delay()
+    DelayMS(5)
+End Sub
 
-function LCD_GetByte() as byte
-    dim LCD_Data as byte
+Function LCD_GetByte() As Byte
+    Dim LCD_Data As Byte
 
-    LCD_PORT_DIR = LCD_PORT_DIR or LCD_DATA_BITS // make LCD data bits inputs
+    LCD_PORT_DIR = LCD_PORT_DIR Or LCD_DATA_BITS // make LCD data bits inputs
     RW_PIN = 1
 
     E_PIN = 1
-    delayus(4)
-    LCD_Data = LCD_PORT_IN and LCD_DATA_BITS
+    DelayUS(4)
+    LCD_Data = LCD_PORT_IN And LCD_DATA_BITS
     E_PIN = 0
-    delayus(4)
+    DelayUS(4)
 
-    LCD_Data = (LCD_Data >> 4) or (LCD_Data << 4)
+    LCD_Data = (LCD_Data >> 4) Or (LCD_Data << 4)
 
     E_PIN = 1
-    delayus(4)
-    LCD_Data = LCD_Data or (LCD_PORT_IN and LCD_DATA_BITS)
+    DelayUS(4)
+    LCD_Data = LCD_Data Or (LCD_PORT_IN And LCD_DATA_BITS)
     E_PIN = 0
-    delayus(4)
+    DelayUS(4)
 
   #if defined(LCD_DATA_ON_HIGH_4_BITS)
-    LCD_Data = (LCD_Data >> 4) or (LCD_Data << 4)
+    LCD_Data = (LCD_Data >> 4) Or (LCD_Data << 4)
   #endif
     result = LCD_Data
-end function
+End Function
 
-sub LCD_PutByte(LCD_Data as byte)
-    LCD_PORT_DIR = LCD_PORT_DIR and not LCD_DATA_BITS // make LCD data bits outputs
+Sub LCD_PutByte(LCD_Data As Byte)
+    LCD_PORT_DIR = LCD_PORT_DIR And Not LCD_DATA_BITS // make LCD data bits outputs
     RW_PIN = 0
 
     // send first nibble
-    LCD_PORT_OUT = LCD_PORT_OUT and not LCD_DATA_BITS
-  #if not defined (LCD_DATA_ON_HIGH_4_BITS)
-    LCD_Data = (LCD_Data >> 4) or (LCD_Data << 4)
+    LCD_PORT_OUT = LCD_PORT_OUT And Not LCD_DATA_BITS
+  #if Not defined (LCD_DATA_ON_HIGH_4_BITS)
+    LCD_Data = (LCD_Data >> 4) Or (LCD_Data << 4)
   #endif
-    LCD_PORT_OUT = LCD_PORT_OUT or (LCD_Data and LCD_DATA_BITS)
+    LCD_PORT_OUT = LCD_PORT_OUT Or (LCD_Data And LCD_DATA_BITS)
     LCD_E_Pulse()
 
-    LCD_Data = (LCD_Data >> 4) or (LCD_Data << 4)
-    LCD_PORT_OUT = LCD_PORT_OUT and not LCD_DATA_BITS
-    LCD_PORT_OUT = LCD_PORT_OUT or (LCD_Data and LCD_DATA_BITS)
+    LCD_Data = (LCD_Data >> 4) Or (LCD_Data << 4)
+    LCD_PORT_OUT = LCD_PORT_OUT And Not LCD_DATA_BITS
+    LCD_PORT_OUT = LCD_PORT_OUT Or (LCD_Data And LCD_DATA_BITS)
     LCD_E_Pulse()
 
-    LCD_PORT_DIR = LCD_PORT_DIR or LCD_DATA_BITS // make LCD data bits inputs
-end sub
+    LCD_PORT_DIR = LCD_PORT_DIR Or LCD_DATA_BITS // make LCD data bits inputs
+End Sub
 
-sub LCD_Busy()
-    dim LCD_Data as byte
+Sub LCD_Busy()
+    Dim LCD_Data As Byte
 
-    if (LCD_BusyBit <> 0) then
-        LCD_PORT_DIR = LCD_PORT_DIR or LCD_DATA_BITS // make LCD data bits inputs
+    If (LCD_BusyBit <> 0) Then
+        LCD_PORT_DIR = LCD_PORT_DIR Or LCD_DATA_BITS // make LCD data bits inputs
         LCD_Data = 0
 
         RS_PIN = 0
         RW_PIN = 1
-        repeat
+        Repeat
             LCD_Data = LCD_GetByte()
-        until ((LCD_Data and LCD_BusyBit) = 0)
-    else
+        Until ((LCD_Data And LCD_BusyBit) = 0)
+    Else
         LCD_Delay() // use 5ms delay when busy bit is unknown
-    endif
-end sub
+    EndIf
+End Sub
 
 
-public sub LCD_SetCGRamAddr(data as byte)
+Public Sub LCD_SetCGRamAddr(data As Byte)
     LCD_Busy()
     RS_PIN = 0
-    LCD_PutByte(data or $40)
-end sub
+    LCD_PutByte(data Or $40)
+End Sub
 
-public sub LCD_SetDDRamAddr(data as byte)
+Public Sub LCD_SetDDRamAddr(data As Byte)
     LCD_Busy()
     RS_PIN = 0
-    LCD_PutByte(data or $80)
-end sub
+    LCD_PutByte(data Or $80)
+End Sub
 
-public sub LCD_WriteCmd(data as byte)
+Public Sub LCD_WriteCmd(data As Byte)
     LCD_Busy()
     RS_PIN = 0
     LCD_PutByte(data)
-end sub
+End Sub
 
-public sub LCD_WriteData(data as byte)
+Public Sub LCD_WriteData(data As Byte)
     LCD_Busy()
     RS_PIN = 1
     LCD_PutByte(data)
     RS_PIN = 0
-end sub
+End Sub
 
 //void LCD_WriteConstString(const unsigned char * prString)
-inline function TBLRD_() as TABLAT
-    asm
+Inline Function TBLRD_() As TABLAT
+    Asm
         TBLRD*
-    end asm
-end function
+    End Asm
+End Function
 
-inline function TBLRD_POSTINC() as TABLAT
-    asm
+Inline Function TBLRD_POSTINC() As TABLAT
+    Asm
         TBLRD*+
-    end asm
-end function
+    End Asm
+End Function
 
-public sub LCD_WriteConstString(prString as TABLEPTR)
-    while (TBLRD_() <> 0)
+Public Sub LCD_WriteConstString(prString As TABLEPTR)
+    While (TBLRD_() <> 0)
         LCD_WriteData(TBLRD_POSTINC())
-    end while
-end sub
+    End While
+End Sub
 
-public sub LCD_WriteString(pString as string)
-    dim ix as byte
+Public Sub LCD_WriteString(pString As String)
+    Dim ix As Byte
 
     ix = 0
-    while (byte(pString(ix)) <> 0)
-        LCD_WriteData(byte(pString(ix)))
+    While (Byte(pString(ix)) <> 0)
+        LCD_WriteData(Byte(pString(ix)))
         ix = ix + 1
-    end while
-end sub
+    End While
+End Sub
 
-public sub LCD_Init()
-    dim LCD_Data as byte
+Public Sub LCD_Init()
+    Dim LCD_Data As Byte
 
     LCD_BusyBit = 0
-    LCD_PORT_DIR = LCD_PORT_DIR  and not LCD_DATA_BITS // make LCD data bits outputs
+    LCD_PORT_DIR = LCD_PORT_DIR  And Not LCD_DATA_BITS // make LCD data bits outputs
     E_PIN_DIR = 0                  // make LCD Enable strobe an output
     RW_PIN_DIR = 0                 // make LCD Read/Write select an output
     RS_PIN_DIR = 0                 // make LCD Register select an output
@@ -316,23 +316,25 @@ public sub LCD_Init()
     E_PIN = 0                      // set LCD Enable strobe to not active
     RW_PIN = 0                     // set LCD Read/Write select to Write
     RS_PIN = 0                     // set LCD Register select to command group
-    LCD_PORT_OUT = LCD_PORT_OUT  and not LCD_DATA_BITS // set LCD data bits to zero
+    LCD_PORT_OUT = LCD_PORT_OUT  And Not LCD_DATA_BITS // set LCD data bits to zero
   #if defined(LCD_POWER_EN)
     LCD_POWER_EN = 1               // Turn on LCD power
   #endif
     LCD_DelayPOR()                 // wait for LCD power on to complete
 
     // Force LCD to 8-bit mode
-    LCD_PORT_OUT = LCD_PORT_OUT and not LCD_DATA_BITS // set LCD data bits to zero
-    LCD_PORT_OUT = LCD_PORT_OUT or (%00110011 and LCD_DATA_BITS)
+    LCD_PORT_OUT = LCD_PORT_OUT And Not LCD_DATA_BITS // set LCD data bits to zero
+    LCD_PORT_OUT = LCD_PORT_OUT Or (%00110011 And LCD_DATA_BITS)
+    LCD_E_Pulse()
+    LCD_Delay()
     LCD_E_Pulse()
     LCD_Delay()
     LCD_E_Pulse()
     LCD_Delay()
 
     // Set LCD to 4-bit mode
-    LCD_PORT_OUT = LCD_PORT_OUT and not LCD_DATA_BITS // set LCD data bits to zero
-    LCD_PORT_OUT = LCD_PORT_OUT or (%00100010 and LCD_DATA_BITS)
+    LCD_PORT_OUT = LCD_PORT_OUT And Not LCD_DATA_BITS // set LCD data bits to zero
+    LCD_PORT_OUT = LCD_PORT_OUT Or (%00100010 And LCD_DATA_BITS)
     LCD_E_Pulse()
     LCD_Delay()
 
@@ -348,17 +350,17 @@ public sub LCD_Init()
     RS_PIN = 0
     LCD_Data = LCD_GetByte()
 
-    if (LCD_Data = $01) then
+    If (LCD_Data = $01) Then
         LCD_BusyBit = $80
-    elseif (LCD_Data = $10) then
+    ElseIf (LCD_Data = $10) Then
         LCD_BusyBit = $08
-    else
+    Else
         LCD_BusyBit = $00
-    endif
+    EndIf
 
     // Turn on display, Setup cursor and blinking
-    LCD_WriteCmd(DOFF and CURSOR_OFF and BLINK_OFF)
-    LCD_WriteCmd(DON and CURSOR_OFF and BLINK_OFF)
+    LCD_WriteCmd(DOFF And CURSOR_OFF And BLINK_OFF)
+    LCD_WriteCmd(DON And CURSOR_OFF And BLINK_OFF)
     LCD_WriteCmd(CLEAR_DISPLAY)
     LCD_WriteCmd(SHIFT_CUR_LEFT)
 
@@ -368,6 +370,6 @@ public sub LCD_Init()
 
     // Set first position on line one, left most character
     LCD_SetDDRamAddr(LINE_ONE)
-end sub
+End Sub
 
-end module
+End Module
