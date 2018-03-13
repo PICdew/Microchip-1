@@ -279,6 +279,11 @@ OpenXLCD:
     bcf     E_PIN
     call    DelayXLCD       ; minimum 100us delay but use 5ms
 
+    bsf     E_PIN
+    DELAY_FOR_FAST_CLOCK
+    bcf     E_PIN
+    call    DelayXLCD       ; minimum 100us delay but use 5ms
+
     movlw   b'00000010'     ; set LCD into 4-bit mode
     xorwf   LCD_PORT,W
     andlw   LCD_DATA_BITS

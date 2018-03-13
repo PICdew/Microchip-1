@@ -211,6 +211,8 @@ void LCD_Init(void)
     LCD_Delay();
     LCD_E_Pulse();
     LCD_Delay();
+    LCD_E_Pulse();
+    LCD_Delay();
     
     /* Set LCD to 4-bit mode */
     LCD_PORT_OUT &= ~LCD_DATA_BITS; /* set LCD data bits to zero */
