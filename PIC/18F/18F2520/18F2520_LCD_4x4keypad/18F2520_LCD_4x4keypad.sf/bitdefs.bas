@@ -1,7 +1,7 @@
-module bit_definitions
+Module bit_definitions
 
 // INTCON
-public const
+Public Const
     RBIF = 0,
     INT0IF = 1,
     TMR0IF = 2,
@@ -11,12 +11,12 @@ public const
     PEIE_GIEL = 6,
     GIE_GIEH = 7
 
-public const
+Public Const
     GIEL = 6,
     GIEH = 7
 
 // INTCON2
-public const
+Public Const
     RBIP = 0,
     TMR0IP = 2,
     INTEDG2 = 4,
@@ -24,8 +24,9 @@ public const
     INTEDG0 = 6,
     _RBPU = 7
 
-public const
+// OPTION_REG
+Public Const
     nRBPU = _RBPU
 
 
-end module
+End Module

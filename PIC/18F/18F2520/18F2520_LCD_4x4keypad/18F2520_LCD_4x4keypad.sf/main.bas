@@ -37,14 +37,14 @@ End Interrupt
 // Display application name and version
 //
 Sub ShowVersion()
-    // unsigned char buffer[17] = "\010\011\012\013\014\015\016\017"; // octal byte constants in a string
-    Const buffer() As Byte = ($08, $09, $0A, $0B, $0C, $0D, $0E, $0F, 0)
+    Dim buffer As String(17) 
+    buffer = #8 + #9 + #10 + #11 + #12 + #13 + #14 + #15 // All 8 character generator symbols in a string
 
     LCD_SetDDRamAddr(LINE_ONE)
     LCD_WriteConstString(@("Test: LCD+Keypad"))
     // Show what is in the character generator RAM
     LCD_SetDDRamAddr(LINE_TWO)
-    LCD_WriteConstString(@buffer)
+    LCD_WriteString(buffer) // invoke string write to LCD to get Swordfish to include the function in the build
     LCD_WriteConstString(@(" 18MAR12"))
 End Sub
 
@@ -61,9 +61,8 @@ main:
     Keypad_Init()
     Tick_Init()
 
-    'INTCONbits.PEIE = 1
-    'INTCONbits.GIE  = 1
-    Enable(ISR_Handler)
+    gScanKeypadFlag   = 0
+    Enable(ISR_Handler) 
 
     // Display the application name and version information
     ShowVersion()

@@ -1,5 +1,6 @@
 # Swordfish BASIC compiler
 # =========================
+*.asm
 *.scl
 *.sfp
 *.cof

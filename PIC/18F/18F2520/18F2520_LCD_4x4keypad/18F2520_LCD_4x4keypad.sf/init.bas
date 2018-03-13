@@ -37,71 +37,71 @@
 //   [14]LCD_D7      [18]RC7
 //
 //
-module init
+Module init
 
 #if (_device = 18F24K20)
-config FOSC = INTIO67   // Oscillator Selection bits (Internal oscillator block, port function on RA6 and RA7) 
-config FCMEN = OFF      // Fail-Safe Clock Monitor Enable bit (Fail-Safe Clock Monitor disabled) 
-config IESO = OFF       // Internal/External Oscillator Switchover bit (Oscillator Switchover mode disabled) 
-config PWRT = OFF       // Power-up Timer Enable bit (PWRT disabled) 
-config BOREN = OFF      // Brown-out Reset Enable bits (Brown-out Reset disabled in hardware and software) 
-config BORV = 18        // Brown Out Reset Voltage bits (VBOR set to 1.8 V nominal) 
-config WDTEN = OFF      // Watchdog Timer Enable bit (WDT is controlled by SWDTEN bit of the WDTCON register) 
-config WDTPS = 32768    // Watchdog Timer Postscale Select bits (1:32768) 
-config CCP2MX = PORTC   // CCP2 MUX bit (CCP2 input/output is multiplexed with RC1) 
-config PBADEN = OFF     // PORTB A/D Enable bit (PORTB<4:0> pins are configured as digital I/O on Reset) 
-config LPT1OSC = OFF    // Low-Power Timer1 Oscillator Enable bit (Timer1 configured for higher power operation) 
-config HFOFST = ON      // HFINTOSC Fast Start-up (HFINTOSC starts clocking the CPU without waiting for the oscillator to stablize.) 
-config MCLRE = ON       // MCLR Pin Enable bit (MCLR pin enabled; RE3 input pin disabled) 
-config STVREN = ON      // Stack Full/Underflow Reset Enable bit (Stack full/underflow will cause Reset) 
-config LVP = OFF        // Single-Supply ICSP Enable bit (Single-Supply ICSP disabled) 
-config XINST = OFF      // Extended Instruction Set Enable bit (Instruction set extension and Indexed Addressing mode disabled (Legacy mode)) 
-config CP0 = OFF        // Code Protection Block 0 (Block 0 (000800-001FFFh) not code-protected) 
-config CP1 = OFF        // Code Protection Block 1 (Block 1 (002000-003FFFh) not code-protected) 
-config CPB = OFF        // Boot Block Code Protection bit (Boot block (000000-0007FFh) not code-protected) 
-config CPD = OFF        // Data EEPROM Code Protection bit (Data EEPROM not code-protected) 
-config WRT0 = OFF       // Write Protection Block 0 (Block 0 (000800-001FFFh) not write-protected) 
-config WRT1 = OFF       // Write Protection Block 1 (Block 1 (002000-003FFFh) not write-protected) 
-config WRTC = OFF       // Configuration Register Write Protection bit (Configuration registers (300000-3000FFh) not write-protected) 
-config WRTB = OFF       // Boot Block Write Protection bit (Boot Block (000000-0007FFh) not write-protected) 
-config WRTD = OFF       // Data EEPROM Write Protection bit (Data EEPROM not write-protected) 
-config EBTR0 = OFF      // Table Read Protection Block 0 (Block 0 (000800-001FFFh) not protected from table reads executed in other blocks) 
-config EBTR1 = OFF      // Table Read Protection Block 1 (Block 1 (002000-003FFFh) not protected from table reads executed in other blocks) 
-config EBTRB = OFF      // Boot Block Table Read Protection bit (Boot Block (000000-0007FFh) not protected from table reads executed in other blocks) 
+Config FOSC = INTIO67   // Oscillator Selection bits (Internal oscillator block, port function on RA6 and RA7) 
+Config FCMEN = OFF      // Fail-Safe Clock Monitor Enable bit (Fail-Safe Clock Monitor disabled) 
+Config IESO = OFF       // Internal/External Oscillator Switchover bit (Oscillator Switchover mode disabled) 
+Config PWRT = OFF       // Power-up Timer Enable bit (PWRT disabled) 
+Config BOREN = OFF      // Brown-out Reset Enable bits (Brown-out Reset disabled in hardware and software) 
+Config BORV = 18        // Brown Out Reset Voltage bits (VBOR set to 1.8 V nominal) 
+Config WDTEN = OFF      // Watchdog Timer Enable bit (WDT is controlled by SWDTEN bit of the WDTCON register) 
+Config WDTPS = 32768    // Watchdog Timer Postscale Select bits (1:32768) 
+Config CCP2MX = PORTC   // CCP2 MUX bit (CCP2 input/output is multiplexed with RC1) 
+Config PBADEN = OFF     // PORTB A/D Enable bit (PORTB<4:0> pins are configured as digital I/O on Reset) 
+Config LPT1OSC = OFF    // Low-Power Timer1 Oscillator Enable bit (Timer1 configured for higher power operation) 
+Config HFOFST = ON      // HFINTOSC Fast Start-up (HFINTOSC starts clocking the CPU without waiting for the oscillator to stablize.) 
+Config MCLRE = ON       // MCLR Pin Enable bit (MCLR pin enabled; RE3 input pin disabled) 
+Config STVREN = ON      // Stack Full/Underflow Reset Enable bit (Stack full/underflow will cause Reset) 
+Config LVP = OFF        // Single-Supply ICSP Enable bit (Single-Supply ICSP disabled) 
+Config XINST = OFF      // Extended Instruction Set Enable bit (Instruction set extension and Indexed Addressing mode disabled (Legacy mode)) 
+Config CP0 = OFF        // Code Protection Block 0 (Block 0 (000800-001FFFh) not code-protected) 
+Config CP1 = OFF        // Code Protection Block 1 (Block 1 (002000-003FFFh) not code-protected) 
+Config CPB = OFF        // Boot Block Code Protection bit (Boot block (000000-0007FFh) not code-protected) 
+Config CPD = OFF        // Data EEPROM Code Protection bit (Data EEPROM not code-protected) 
+Config WRT0 = OFF       // Write Protection Block 0 (Block 0 (000800-001FFFh) not write-protected) 
+Config WRT1 = OFF       // Write Protection Block 1 (Block 1 (002000-003FFFh) not write-protected) 
+Config WRTC = OFF       // Configuration Register Write Protection bit (Configuration registers (300000-3000FFh) not write-protected) 
+Config WRTB = OFF       // Boot Block Write Protection bit (Boot Block (000000-0007FFh) not write-protected) 
+Config WRTD = OFF       // Data EEPROM Write Protection bit (Data EEPROM not write-protected) 
+Config EBTR0 = OFF      // Table Read Protection Block 0 (Block 0 (000800-001FFFh) not protected from table reads executed in other blocks) 
+Config EBTR1 = OFF      // Table Read Protection Block 1 (Block 1 (002000-003FFFh) not protected from table reads executed in other blocks) 
+Config EBTRB = OFF      // Boot Block Table Read Protection bit (Boot Block (000000-0007FFh) not protected from table reads executed in other blocks) 
 #endif
 
 #if (_device = 18F2520)
-config OSC = INTIO67    // Oscillator Selection bits (Internal RC oscillator, port function on RA6 and port function on RA7) 
-config FCMEN = OFF      // Fail-Safe Clock Monitor Enable bit (Fail-Safe Clock Monitor disabled) 
-config IESO = OFF       // Internal/External Switchover bit (Internal/External Switchover mode disabled) 
-config PWRT = OFF       // Power-up Timer enable bit (PWRT disabled) 
-config BOREN = OFF      // Brown-out Reset enable bit (Brown-out Reset disabled) 
-config BORV = 3         // Brown-out Reset Voltage bits (VBOR set to 2.0V) 
-config WDT = OFF        // Watchdog Timer Enable bit (WDT disabled (control is placed on the SWDTEN bit)) 
-config WDTPS = 32768    // Watchdog Timer Postscale Select bits (1:32768) 
-config CCP2MX = PORTC   // CCP2 MUX bit (CCP2 input/output is multiplexed with RC1) 
-config PBADEN = OFF     // PORTB A/D Enable bit (PORTB<4:0> pins are configured as digital I/O on Reset) 
-config MCLRE = ON       // MCLR Pin Enable bit (MCLR pin enabled; RE3 input pin disabled) 
-config STVREN = ON      // Stack Full/Underflow Reset Enable bit (Stack full/underflow will cause Reset) 
-config LVP = OFF        // Single-Supply ICSP Enable bit (Single-Supply ICSP disabled) 
-config CP0 = OFF        // Code Protection bit (Block 0 (000200-0007FFh) not code-protected) 
-config CP1 = OFF        // Code Protection bit (Block 1 (000800-000FFFh) not code-protected) 
-config CPB = OFF        // Boot Block Code Protection bit (Boot block (000000-0001FFh) is not code-protected) 
-config CPD = OFF        // Data EEPROM Code Protection bit (Data EEPROM is not code-protected) 
-config WRT0 = OFF       // Write Protection bit (Block 0 (000200-0007FFh) not write-protected) 
-config WRT1 = OFF       // Write Protection bit (Block 1 (000800-000FFFh) not write-protected) 
-config WRTC = OFF       // Configuration Register Write Protection bit (Configuration registers (300000-3000FFh) are not write-protected) 
-config WRTB = OFF       // Boot Block Write Protection bit (Boot block (000000-0001FFh) is not write-protected) 
-config WRTD = OFF       // Data EEPROM Write Protection bit (Data EEPROM is not write-protected) 
-config EBTR0 = OFF      // Table Read Protection bit (Block 0 (000200-0007FFh) not protected from table reads executed in other blocks) 
-config EBTR1 = OFF      // Table Read Protection bit (Block 1 (000800-000FFFh) not protected from table reads executed in other blocks) 
-config EBTRB = OFF      // Boot Block Table Read Protection bit (Boot block (000000-0001FFh) is not protected from table reads executed in other blocks) 
+Config OSC = INTIO67    // Oscillator Selection bits (Internal RC oscillator, port function on RA6 and port function on RA7) 
+Config FCMEN = OFF      // Fail-Safe Clock Monitor Enable bit (Fail-Safe Clock Monitor disabled) 
+Config IESO = OFF       // Internal/External Switchover bit (Internal/External Switchover mode disabled) 
+Config PWRT = OFF       // Power-up Timer enable bit (PWRT disabled) 
+Config BOREN = OFF      // Brown-out Reset enable bit (Brown-out Reset disabled) 
+Config BORV = 3         // Brown-out Reset Voltage bits (VBOR set to 2.0V) 
+Config WDT = OFF        // Watchdog Timer Enable bit (WDT disabled (control is placed on the SWDTEN bit)) 
+Config WDTPS = 32768    // Watchdog Timer Postscale Select bits (1:32768) 
+Config CCP2MX = PORTC   // CCP2 MUX bit (CCP2 input/output is multiplexed with RC1) 
+Config PBADEN = OFF     // PORTB A/D Enable bit (PORTB<4:0> pins are configured as digital I/O on Reset) 
+Config MCLRE = ON       // MCLR Pin Enable bit (MCLR pin enabled; RE3 input pin disabled) 
+Config STVREN = ON      // Stack Full/Underflow Reset Enable bit (Stack full/underflow will cause Reset) 
+Config LVP = OFF        // Single-Supply ICSP Enable bit (Single-Supply ICSP disabled) 
+Config CP0 = OFF        // Code Protection bit (Block 0 (000200-0007FFh) not code-protected) 
+Config CP1 = OFF        // Code Protection bit (Block 1 (000800-000FFFh) not code-protected) 
+Config CPB = OFF        // Boot Block Code Protection bit (Boot block (000000-0001FFh) is not code-protected) 
+Config CPD = OFF        // Data EEPROM Code Protection bit (Data EEPROM is not code-protected) 
+Config WRT0 = OFF       // Write Protection bit (Block 0 (000200-0007FFh) not write-protected) 
+Config WRT1 = OFF       // Write Protection bit (Block 1 (000800-000FFFh) not write-protected) 
+Config WRTC = OFF       // Configuration Register Write Protection bit (Configuration registers (300000-3000FFh) are not write-protected) 
+Config WRTB = OFF       // Boot Block Write Protection bit (Boot block (000000-0001FFh) is not write-protected) 
+Config WRTD = OFF       // Data EEPROM Write Protection bit (Data EEPROM is not write-protected) 
+Config EBTR0 = OFF      // Table Read Protection bit (Block 0 (000200-0007FFh) not protected from table reads executed in other blocks) 
+Config EBTR1 = OFF      // Table Read Protection bit (Block 1 (000800-000FFFh) not protected from table reads executed in other blocks) 
+Config EBTRB = OFF      // Boot Block Table Read Protection bit (Boot block (000000-0001FFh) is not protected from table reads executed in other blocks) 
 #endif
 
-include "init_h.bas"
-include "bitdefs.bas"
+Include "init_h.bas"
+Include "bitdefs.bas"
 
-public sub PIC_Init()
+Public Sub PIC_Init()
     INTCON = 0     // disable interrupts
     INTCON2 = $F5
     INTCON3 = $C0
@@ -110,7 +110,6 @@ public sub PIC_Init()
 
     OSCTUNE = 0
     OSCCON = OSCCON_INIT
-    'RCON.bits(IPEN) = 0  // use legacy interrupt model
 
   #if (_device = 18F24K20)
     ANSEL  = $00      // configure all ADC inputs for digital I/O
@@ -129,6 +128,6 @@ public sub PIC_Init()
     INTCON2.bits(nRBPU) = 0 // enable PORTB pull-ups for inputs
     LATC   = $00
     TRISC  = $F3      // RC2,RC3 are keypad COL3,COL4 drivers, RC4-RC7 are LCD I/O D4-D7
-end sub
+End Sub
 
-end module
+End Module

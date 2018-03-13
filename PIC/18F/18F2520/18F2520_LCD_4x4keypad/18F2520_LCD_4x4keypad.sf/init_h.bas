@@ -16,7 +16,7 @@ Public Const OSCCON_INIT = $40
 #define _XTAL_FREQ = FSYS
 
 //   Specify the TIMER0 prescale and keypad matrix debounce count based on the system clock frequency
-#if   (FSYS >= 8000000)
+#if (FSYS >= 8000000)
 Public Const  T0CON_INIT = %11000010 // TMR0 clock edge low to high, TMR0 clock = FCY, TMR0 prescale 1:8
 Public Const KP_DEBOUNCE_COUNT = 16
 #elseif (FSYS >= 4000000)
