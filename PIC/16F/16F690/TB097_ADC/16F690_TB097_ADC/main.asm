@@ -22,7 +22,7 @@
 ;   Data is sent using a bit-bang UART on PORTA bit 0, PGD.
 ;   The LED DS1 is on during UART send.
 ;
-; http://www.microchip.com/stellent/idcplg?IdcService=SS_GET_PAGE&nodeId=1406&dDocName=en023805
+; http://www.microchip.com/developmenttools/productdetails.aspx?partno=pg164120
 ; http://ww1.microchip.com/downloads/en/DeviceDoc/Low%20Pin%20Count%20User%20Guide%2051556a.pdf
 ; http://ww1.microchip.com/downloads/en/DeviceDoc/LPC%20Demo%20Board%20Schematic.pdf
 ; http://www.mouser.com/Search/Refine.aspx?Keyword=DM164120-1
