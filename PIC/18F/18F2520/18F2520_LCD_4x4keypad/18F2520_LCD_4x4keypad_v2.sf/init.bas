@@ -10,16 +10,16 @@
 //             ->  2 : RA0/AN0           PGC/RB6 : 27 <> PGC
 //        LED1 <>  3 : RA1/AN1           PGM/RB5 : 26 <> KP_COL2_OUT
 //        LED2 <>  4 : RA2/AN2               RB4 : 25 <> KP_COL1_OUT
-//      LCD_RS <>  5 : RA3/AN3               RB3 : 24 <> KP_ROW4_IN
-//      LCD_RW <>  6 : RA4/C1OUT             RB2 : 23 <> KP_ROW3_IN
-//      LCD_E  <>  7 : RA5/AN4               RB1 : 22 <> KP_ROW2_IN
-//         GND <>  8 : VSS                   RB0 : 21 <> KP_ROW1_IN
+//      LCD_RS <>  5 : RA3/AN3               RB3 : 24 <> KP_ROW4_IN  LCD_D7
+//      LCD_RW <>  6 : RA4/C1OUT             RB2 : 23 <> KP_ROW3_IN  LCD_D6
+//      LCD_E  <>  7 : RA5/AN4               RB1 : 22 <> KP_ROW2_IN  LCD_D5
+//         GND <>  8 : VSS                   RB0 : 21 <> KP_ROW1_IN  LCD_D4
 //       20MHz <>  9 : RA7/OSC1              VDD : 20 <- 5v0
 //       20MHz <> 10 : RA6/OSC2              VSS : 19 <- GND
-//   32.768KHz <> 11 : RC0/SOSCO       RX/DT/RC7 : 18 <> LCD_D7
-//   32.768KHz <> 12 : RC1/SOSCI       TX/CK/RC6 : 17 <> LCD_D6
-// KP_COL3_OUT <> 13 : RC2/CCP1     SPI_MOSI/RC5 : 16 <> LCD_D5
-// KP_COL4_OUT <> 14 : RC3/SPI_CLK  SPI_MISO/RC4 : 15 <> LCD_D4
+//   32.768KHz <> 11 : RC0/SOSCO       RX/DT/RC7 : 18 <> 
+//   32.768KHz <> 12 : RC1/SOSCI       TX/CK/RC6 : 17 <> 
+// KP_COL3_OUT <> 13 : RC2/CCP1     SPI_MOSI/RC5 : 16 <> 
+// KP_COL4_OUT <> 14 : RC3/SPI_CLK  SPI_MISO/RC4 : 15 <> 
 //                   +---------------------------:
 //                              DIP-28
 //
@@ -31,10 +31,10 @@
 //   [ 4]LCD_RS      [ 5]RA3      [4]KP_COL2_OUT  [26]RB5    [E][0][.][D] R4
 //   [ 5]LCD_RW      [ 6]RA4      [5]KP_COL3_OUT  [13]RC2     C  C  C  C
 //   [ 6]LCD_E       [ 7]RA5      [6]KP_COL4_OUT  [14]RC3     1  2  3  4
-//   [11]LCD_D4      [15]RC4      [7]KP_ROW4_IN   [23]RB3
-//   [12]LCD_D5      [16]RC5      [8]KP_ROW3_IN   [24]RB2
-//   [13]LCD_D6      [17]RC6
-//   [14]LCD_D7      [18]RC7
+//   [11]LCD_D4      [21]RB0      [7]KP_ROW4_IN   [23]RB3
+//   [12]LCD_D5      [22]RB1      [8]KP_ROW3_IN   [24]RB2
+//   [13]LCD_D6      [24]RB2
+//   [14]LCD_D7      [23]RB3
 //
 //
 Module init

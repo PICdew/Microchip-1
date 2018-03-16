@@ -16,8 +16,8 @@ Public Dim
     KP_ROW4_IN  As PORTB.bits(3),
     KP_COL1_OUT As LATB.bits(4),
     KP_COL2_OUT As LATB.bits(5),
-    KP_COL3_OUT As LATC.bits(2),
-    KP_COL4_OUT As LATC.bits(3) 
+    KP_COL3_OUT As LATA.bits(1),
+    KP_COL4_OUT As LATA.bits(2) 
 
 Public Dim
     KP_ROW1_IN_DIR  As TRISB.bits(0),
@@ -26,8 +26,8 @@ Public Dim
     KP_ROW4_IN_DIR  As TRISB.bits(3),
     KP_COL1_OUT_DIR As TRISB.bits(4),
     KP_COL2_OUT_DIR As TRISB.bits(5),
-    KP_COL3_OUT_DIR As TRISC.bits(2),
-    KP_COL4_OUT_DIR As TRISC.bits(3)
+    KP_COL3_OUT_DIR As TRISA.bits(1),
+    KP_COL4_OUT_DIR As TRISA.bits(2)
 
 // enum eKeyEvent
 Public Const
@@ -154,10 +154,10 @@ Public Sub Keypad_Scan()
     KP_COL3_OUT = 1
     KP_COL2_OUT = 1
     KP_COL1_OUT = 1
-    KP_COL1_OUT_DIR = 1
-    KP_COL2_OUT_DIR = 1
-    KP_COL3_OUT_DIR = 1
-    KP_COL4_OUT_DIR = 1
+    KP_COL1_OUT_DIR = 0
+    KP_COL2_OUT_DIR = 0
+    KP_COL3_OUT_DIR = 0
+    KP_COL4_OUT_DIR = 0
 
     // check if matrix changed since last scan
     If ((KP_Sample Xor KP_Last) <> 0) Then
