@@ -11,8 +11,8 @@
 ;             GND <> :  8 VSS          INT0 21 : <> RB0
 ;      20MHz XTAL -> :  9 OSC1          VDD 20 : <- 5v0
 ;      20MHz XTAL <- : 10 OSC2          VSS 19 : <- GND
-;      LCD_RS RC0 -> : 11 T1OSO          RX 18 : <> RC7
-;      LCD_E  RC1 <> : 12 T1OSI          TX 17 : <> RC6
+;             RC0 <> : 11 T1OSO          RX 18 : <> RC7
+;             RC1 <> : 12 T1OSI          TX 17 : <> RC6
 ; MAX7219_DI  RC2 <> : 13 CCP1          SDO 16 : <> RC5 MAX7219_CLK
 ;             RC3 <> : 14 SCK/SCL   SDA/SDI 15 : <> RC4 MAX7219_CSn
 ;                    +-------------------------+
