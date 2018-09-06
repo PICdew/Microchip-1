@@ -47,19 +47,24 @@
  */
 
 #include <stdlib.h>
+#include <string.h>
 #include "init.h"
 #include "lcd.h"
+#include "i2c1.h"
 #include "buttons.h"
 /*
  * Global Data 
  */
-unsigned char gButtonEvent;
+volatile unsigned char gButtonEvent;
+volatile unsigned char gTick;
+
 /*
  * Initialize TIMER0
  */
 void TIMER0_Init( void )
 {
     PIE0bits.TMR0IE = 0;         /* disable TIMER0 interrupts */
+    gTick = 0;
     T0CON0 = 0;                  /* stop TIMER0 */
     T0CON1 = 0;
     T0CON1bits.T0CKPS  = 0b0101; /* set prescale at 1:32 */
@@ -123,15 +128,49 @@ void ShowLCDSymbols(unsigned char Symbol)
     }
 }
 /*
+ * 
+ */
+void ShowLCDHexByte(unsigned char HexByte)
+{
+    unsigned char buffer[17];
+    unsigned char index;
+
+    buffer[0] = 0;
+    utoa(buffer,HexByte,16);
+    LCD_WriteString(buffer);
+}
+/*
+ * 
+ */
+void ShowLCDDecByte(unsigned char DecByte)
+{
+    unsigned char buffer[17];
+    unsigned char index;
+
+    buffer[0] = 0;
+    utoa(buffer,DecByte,10);
+    LCD_WriteString(buffer);
+}
+/*
  * Main program
  */
+#define I2C_TC74   (0x9A)
+#define I2C_EEPROM (0xA0)
+#define I2C_BRG    ((FSYS/(400000ul*4))-1)
+#define EEPROM_ADDRESS (0x03)
+
 void main(void) {
     
     unsigned char ButtonState;
     unsigned char LCD_symbols;
+    unsigned char I2C_data[4];
+    I2C_Result_t status;
+    unsigned char I2C_ProbeAddress;
     
     PIC_Init();
     LCD_Init();
+    SSP1ADD = I2C_BRG;
+    I2C1_Init(MASTER,SLEW_ON);
     TIMER0_Init();
     Buttons_Init();
     gButtonEvent = 0;
@@ -147,12 +186,77 @@ void main(void) {
 
     TRISB &= 0xF0;      /* make PORTB bits 0-3 outputs */
     LATB  &= 0xF0;      /* turn off LEDs on PORTB bits 0-3 */
+#if 0
+    /*
+     * Enumerate the I2C address space
+     */
+    LCD_SetDDRamAddr(LINE_TWO);
+    LCD_WriteConstString("                ");
+    LCD_SetDDRamAddr(LINE_TWO);
+    I2C_ProbeAddress = 0;
+    for(I2C_ProbeAddress = 0; I2C_ProbeAddress < 128u; I2C_ProbeAddress++)
+    {
+        if(I2C1_AckProbe((unsigned char)(I2C_ProbeAddress << 1)) == S_OK)
+        {
+            ShowLCDHexByte((unsigned char)(I2C_ProbeAddress << 1));
+            LCD_WriteData(' ');
+        }
+    };
+    /*
+     * Test EEPROM
+     */
+    status = I2C1_SequentialRead(I2C_EEPROM, EEPROM_ADDRESS, I2C_data, 1);
+    I2C_data[0]++;
+    status = I2C1_SequentialWrite(I2C_EEPROM, EEPROM_ADDRESS, I2C_data, 1);
+    LCD_SetDDRamAddr(LINE_TWO);
+    LCD_WriteConstString("R        W      ");
+    LCD_SetDDRamAddr(LINE_TWO+10);
+    ShowLCDHexByte(status);
+    LCD_SetDDRamAddr(LINE_TWO+1);
+    I2C1_AckPolling(I2C_EEPROM);
+    I2C_data[0] = 0;
+    status = I2C1_SequentialRead(I2C_EEPROM, EEPROM_ADDRESS, I2C_data, 1);
+    ShowLCDHexByte(status);
+    LCD_WriteData('@');
+    ShowLCDHexByte(EEPROM_ADDRESS);
+    LCD_WriteData('=');
+    ShowLCDHexByte(I2C_data[0]);
+#endif
+    /*
+     * Initialize TC75
+     */
+    I2C_data[1] = 0x01; /* TC75, RWCR register */
+    I2C_data[0] = 0x00; /* TC75, assert normal mode */
+    I2C1_SequentialWrite(I2C_EEPROM, 0x0100, I2C_data, 1);
+    //I2C1_Transaction(I2C_TC74, I2C_data, 2, 0, 0);
+    LCD_SetDDRamAddr(LINE_TWO);
+    LCD_WriteConstString("                ");
+    NOP();
+    NOP();
+    NOP();
     
     /*
      * Application loop
      */
     for(;;)
     {
+        if (gTick)
+        {
+            I2C_data[1] = 0x00; /* TC75, assert normal mode */
+            I2C_data[0] = 0x00; /* TC75, assert normal mode */
+//            I2C1_Transaction(I2C_TC74, I2C_data, 2, 0, 0);
+            I2C1_SequentialRead(I2C_EEPROM, 0x0000, I2C_data, 1);
+            LCD_SetDDRamAddr(LINE_TWO);
+            if(I2C_data[0] & 0x80u)
+            {
+                LCD_WriteData('-');
+                I2C_data[0] ^= 0xFF;
+                I2C_data[0]++;
+            }
+            ShowLCDDecByte(I2C_data[0]);
+            LCD_WriteConstString("\337C");
+        }
+        
         if (gButtonEvent)
         {
             gButtonEvent = 0;
@@ -187,6 +291,8 @@ void interrupt ISR_Handler(void)
         if(PIR0bits.TMR0IF)
         {
             PIR0bits.TMR0IF = 0;
+            gTick++;
+            
             if (Buttons_Poll() & (BUTTON_S2_CHANGE_MASK | BUTTON_S3_CHANGE_MASK))
             {
                 if(!gButtonEvent)
