@@ -113,7 +113,7 @@ static void LCD_delay_us( unsigned char delay )
 
 /*
  * WARNING: Not a portable function.
- * Maximum instruction clock frequency 16MHz.
+ * Maximum instruction clock frequency 40MHz.
  * Maximum delay 65535 milliseconds.
  */
 static void LCD_delay_ms( unsigned int delay )
