@@ -106,7 +106,7 @@ void PIC_Init(void)
         /* wait, with timeout, for the PLL to lock */
         for(ClockSwitchTimeout=60000; --ClockSwitchTimeout && !OSCCONbits.LOCK;);
         
-        /* at this point the system oscillator should be 32MHz */
+        /* at this point the system oscillator should be 78.6432 MHz */
     }
 
     /* Disable analog mode for all GPIOs */
