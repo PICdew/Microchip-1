@@ -19,7 +19,7 @@
  * The initialization code MUST set the system clock to implement these definitions.
  * 
  */
-/* Setup the clock to run at about 39.3216 MIPS from 7.3728MHz internal oscillator */
+/* Setup the clock to run at about 78.6432 MHz (39.3216 MIPS) from 7.3728MHz internal oscillator */
 #define FSRC  (7372800ul)    /* nominal fast RC frequency */
 #define PLL_N1 (3ul)         /* PLLPRE  CLKDIV<4:0> range 2 to 33 */
 #define PLL_M  (64ul)        /* PLLDIV  PLLFBD<8:0> range 2 to 513 */
