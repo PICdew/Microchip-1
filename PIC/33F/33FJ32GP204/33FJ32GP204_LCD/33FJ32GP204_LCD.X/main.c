@@ -6,7 +6,7 @@
  * Target hardware: Unknown
  *
  * Description:
- *  Example of sending characters to a 16 charcacter by 2 row LCD module using the HD44780 4-bit interface method.
+ *  Example of sending characters to a 16 character by 2 row LCD module using the HD44780 4-bit interface method.
  *
  * Notes:
  *
