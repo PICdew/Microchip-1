@@ -296,7 +296,7 @@ void DisplayDigit(unsigned char digit)
 
     if (digit < sizeof(SEGMENT_MAP))
     {
-        LATB = (LATB & 0x7F) | SEGMENT_MAP[digit];
+        LATB = (LATB & ~0x7F) | SEGMENT_MAP[digit];
     }
     else
     {
